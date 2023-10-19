@@ -2,6 +2,9 @@ import os
 from typing import Any, Union, Tuple
 import deepspeech
 import numpy as np
+import pyttsx3
+from gtts import gTTS
+import pygame as pg
 import pandas as pd
 import wave
 from pydub import AudioSegment
@@ -102,3 +105,22 @@ def read_wav_from_database(file_id: int, cursor: Any) -> Tuple[np.ndarray, str, 
     audio_array = np.frombuffer(audio_bytes, np.int16)
 
     return audio_array, transcript, meta_data['frame_rate']
+
+
+# Initialize TTS engine
+engine = pyttsx3.init()
+voices = engine.getProperty('voices')
+engine.setProperty('voice', voices[1].id)
+
+
+def speak(response: str) -> None:
+    """
+    This function speaks out loud whatever string is passed in response argument.
+
+    Args:
+        response: A string to synthesize
+
+    Returns: None
+    """
+    engine.say(response)
+    engine.runAndWait()
