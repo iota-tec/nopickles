@@ -57,7 +57,7 @@ def store_into_database(file: str, transcript: str, cursor: Any) -> None:
     # Prepare to convert audio into bytes
     buffer = io.BytesIO()
 
-    # Export audio data into bytes
+    # Export audio data into bytes using AudioSegment's ``export`` method
     audio.export(buffer, format='wav')
     audio_bytes = buffer.getvalue()
 
@@ -92,8 +92,8 @@ def read_wav_from_database(file_id: int, cursor: Any) -> Tuple[np.ndarray, str, 
         FileNotFoundError: If the row with the specified file ID does not exist.
     """
 
-    query = f'SELECT audio_data, transcript, meta_data FROM audio_files WHERE id={file_id}'
-    cursor.execute(query)
+    query = f'SELECT audio_data, transcript, meta_data FROM audio_files WHERE id=%s'
+    cursor.execute(query, (file_id,))
     row = cursor.fetchone()
 
     if row is None:
