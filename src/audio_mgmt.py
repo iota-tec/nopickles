@@ -1,14 +1,7 @@
-import os
 from typing import Any, Union, Tuple
-import deepspeech
 import numpy as np
 import pyttsx3
-from gtts import gTTS
-import pygame as pg
-import pandas as pd
-import wave
 from pydub import AudioSegment
-import mysql.connector
 import json
 import io
 
@@ -36,7 +29,7 @@ def convert_to_16k(filename: str) -> Union[AudioSegment, str]:
 
 def store_into_database(file: str, transcript: str, cursor: Any) -> None:
     """
-    Store an audio file and its transcript into a MySQL database.
+    Store an audio file and its transcript into audio_files table of MySQL database.
 
     Args:
         file (str): Path to the audio file
@@ -48,20 +41,15 @@ def store_into_database(file: str, transcript: str, cursor: Any) -> None:
         Committing the transaction is done outside this function.
     """
 
-    # SQL query to insert new record into 'audio_files' table
     query = 'INSERT INTO audio_files(audio_data, transcript, meta_data) VALUES (%s, %s, %s)'
 
-    # Convert audio to 16K frame rate and 1 channel
     audio = convert_to_16k(file)
 
-    # Prepare to convert audio into bytes
+    # Export audio data into bytes using AudioSegment's ``export`` method
     buffer = io.BytesIO()
-
-    # Export audio data into bytes
     audio.export(buffer, format='wav')
     audio_bytes = buffer.getvalue()
 
-    # Prepare metadata as a JSON string
     meta_data = json.dumps({
         'filename': file,
         'length': len(audio),
@@ -69,10 +57,7 @@ def store_into_database(file: str, transcript: str, cursor: Any) -> None:
         'channels': audio.channels
     })
 
-    # Values to be inserted into the table
     val = (audio_bytes, transcript, meta_data)
-
-    # Execute the SQL query
     cursor.execute(query, val)
 
 
@@ -92,8 +77,8 @@ def read_wav_from_database(file_id: int, cursor: Any) -> Tuple[np.ndarray, str, 
         FileNotFoundError: If the row with the specified file ID does not exist.
     """
 
-    query = f'SELECT audio_data, transcript, meta_data FROM audio_files WHERE id={file_id}'
-    cursor.execute(query)
+    query = f'SELECT audio_data, transcript, meta_data FROM audio_files WHERE id=%s'
+    cursor.execute(query, (file_id,))
     row = cursor.fetchone()
 
     if row is None:
