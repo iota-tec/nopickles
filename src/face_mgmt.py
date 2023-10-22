@@ -1,4 +1,5 @@
 import os.path
+import typing
 from typing import Union, Optional, Any, List, Tuple
 import face_recognition
 import cv2
@@ -60,7 +61,7 @@ def store_into_database(file: Optional[str] = None, *, cursor: Any) -> None:
     cursor.execute(query, val)
 
 
-def read_encoding_from_database(face_id: Union[int, List[int]], cursor: Any) -> List[np.ndarray]:
+def read_encoding_from_database(face_id: Union[int, List[int], str], cursor: Any) -> typing.Dict:
     """
     Fetch face encoding(s) from the database given the face ID(s).
 
@@ -75,11 +76,15 @@ def read_encoding_from_database(face_id: Union[int, List[int]], cursor: Any) -> 
     - FileNotFoundError: If any of the face IDs do not have an associated encoding.
     """
 
-    # Prepares variables for batch operation if face_id is a list, and for single operation if face_id is a single index
+    # Prepares variables for batch operation if face_id is a list, and for single operation if face_id is a
+    # single index
     placeholder = ', '.join(['%s'] * len(face_id)) if not isinstance(face_id, int) else '%s'
     face_id = (face_id,) if isinstance(face_id, int) else face_id
 
-    query = f'SELECT face_encoding FROM faces WHERE face_id IN ({placeholder})'
+    if face_id == 'all':
+        query = 'SELECT face_id, face_encoding, person_name FROM faces'
+    else:
+        query = f'SELECT face_id, face_encoding, person_name FROM faces WHERE face_id IN ({placeholder})'
     cursor.execute(query, face_id)
     rows = cursor.fetchall()
 
@@ -88,9 +93,22 @@ def read_encoding_from_database(face_id: Union[int, List[int]], cursor: Any) -> 
         idx = next((i for i, row in enumerate(rows) if None in row), None)
         raise FileNotFoundError(f"Encoding with ID {idx} not found in the database.")
 
-    encodings = [np.frombuffer(row[0]) for row in rows]
+    encoding_dict = {(face_id, person_name): np.frombuffer(encoding) for face_id, encoding, person_name in rows}
 
-    return encodings
+    return encoding_dict
 
-# IMMEDIATELY PENDING:
-# Create function for matching face
+
+def match_face(current_face: Union[str, None] = None, *, cursor):
+    encoding_dict = read_encoding_from_database('all', cursor)
+    current_encoding = convert_to_encoding(current_face)
+    all_encodings = list(encoding_dict.values())
+    matches = face_recognition.compare_faces(all_encodings, current_encoding)
+
+    for idx, match in enumerate(matches):
+        if match:
+            matched_key = list(encoding_dict.keys())[idx]
+            face_id, person_name = matched_key
+            return face_id, person_name
+
+# PENDING IMMEDIATELY
+# Modify read_encodings_from_database() to process in batches
