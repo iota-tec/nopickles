@@ -104,7 +104,7 @@ def match_face(current_face: Union[str, None] = None, *, cursor):
     current_person_name, current_encoding = convert_to_encoding(current_face)
     all_encodings = list(encoding_dict.values())
     print(all_encodings, type(all_encodings))
-    matches = face_recognition.compare_faces(all_encodings, current_encoding, tolerance=0.8)
+    matches = face_recognition.compare_faces(all_encodings, current_encoding, tolerance=0.675)
 
     for idx, match in enumerate(matches):
         if match:
@@ -118,4 +118,5 @@ def match_face(current_face: Union[str, None] = None, *, cursor):
 
 # PENDING IMMEDIATELY
 # Modify read_encodings_from_database() to process in batches
+# Replace face-recognition with opencv's dnn
 

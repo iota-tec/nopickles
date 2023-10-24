@@ -28,6 +28,7 @@ face_id, person_name = face_mgmt.match_face(cursor=customer_cursor)
 speech = None
 if person_name:
     print(person_name)
+    audio_mgmt.speak(f'Hi {person_name}, how can I help you today?')
     speech = audio_mgmt.listen()
 
 # NLP working here...
