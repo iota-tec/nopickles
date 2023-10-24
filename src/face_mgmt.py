@@ -83,9 +83,10 @@ def read_encoding_from_database(face_id: Union[int, List[int], str], cursor: Any
 
     if face_id == 'all':
         query = 'SELECT face_id, face_encoding, person_name FROM faces'
+        cursor.execute(query)
     else:
         query = f'SELECT face_id, face_encoding, person_name FROM faces WHERE face_id IN ({placeholder})'
-    cursor.execute(query, face_id)
+        cursor.execute(query, face_id)
     rows = cursor.fetchall()
 
     # Check if any row has None value
@@ -100,15 +101,21 @@ def read_encoding_from_database(face_id: Union[int, List[int], str], cursor: Any
 
 def match_face(current_face: Union[str, None] = None, *, cursor):
     encoding_dict = read_encoding_from_database('all', cursor)
-    current_encoding = convert_to_encoding(current_face)
+    current_person_name, current_encoding = convert_to_encoding(current_face)
     all_encodings = list(encoding_dict.values())
-    matches = face_recognition.compare_faces(all_encodings, current_encoding)
+    print(all_encodings, type(all_encodings))
+    matches = face_recognition.compare_faces(all_encodings, current_encoding, tolerance=0.8)
 
     for idx, match in enumerate(matches):
         if match:
             matched_key = list(encoding_dict.keys())[idx]
             face_id, person_name = matched_key
             return face_id, person_name
+        else:
+            print("New customer!")
+            return None, None
+
 
 # PENDING IMMEDIATELY
 # Modify read_encodings_from_database() to process in batches
+
