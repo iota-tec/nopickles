@@ -1,9 +1,9 @@
 import os.path
 import typing
 from typing import Union, Optional, Any, List, Tuple
-import face_recognition
+
 import cv2
-import mysql
+import face_recognition
 import numpy as np
 
 
@@ -35,7 +35,7 @@ def convert_to_encoding(file: Union[str, None] = None) -> Union[Tuple[str, Any],
 
         face_locations = face_recognition.face_locations(frame)
         encodings = face_recognition.face_encodings(frame, face_locations)
-
+        print(type(encodings))
         return None, encodings[0]
 
 
@@ -103,20 +103,19 @@ def match_face(current_face: Union[str, None] = None, *, cursor):
     encoding_dict = read_encoding_from_database('all', cursor)
     current_person_name, current_encoding = convert_to_encoding(current_face)
     all_encodings = list(encoding_dict.values())
-    print(all_encodings, type(all_encodings))
-    matches = face_recognition.compare_faces(all_encodings, current_encoding, tolerance=0.675)
-
+    matches = face_recognition.compare_faces(all_encodings, current_encoding, tolerance=0.6)  # list of Booleans
     for idx, match in enumerate(matches):
         if match:
             matched_key = list(encoding_dict.keys())[idx]
             face_id, person_name = matched_key
             return face_id, person_name
         else:
-            print("New customer!")
-            return None, None
+            handle_new_customer()
 
+
+def handle_new_customer():
+    pass
 
 # PENDING IMMEDIATELY
 # Modify read_encodings_from_database() to process in batches
 # Replace face-recognition with opencv's dnn
-

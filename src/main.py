@@ -2,6 +2,7 @@ import deepspeech
 import mysql.connector
 import audio_mgmt
 import face_mgmt
+import nlp
 
 ds = deepspeech.Model('../resources/deepspeech/pretrained/deepspeech-0.9.3-models.pbmm')
 
@@ -25,10 +26,13 @@ customer_cursor = chato_customer_db.cursor()
 
 face_id, person_name = face_mgmt.match_face(cursor=customer_cursor)
 
-speech = None
+
+print(person_name)
 if person_name:
-    print(person_name)
     audio_mgmt.speak(f'Hi {person_name}, how can I help you today?')
+    speech = audio_mgmt.listen()
+else:
+    audio_mgmt.speak(f'Hi, how can I help you today?')
     speech = audio_mgmt.listen()
 
 # NLP working here...

@@ -99,69 +99,18 @@ def read_wav_from_database(file_id: int, cursor: Any) -> Tuple[np.ndarray, str, 
     return audio_array, transcript, meta_data['frame_rate']
 
 
-# def listen() -> np.ndarray:
-#     """
-#     Listen to a microphone input and return the speech segment as a NumPy array.
-#
-#     The function starts listening to the microphone and captures audio chunks in real-time.
-#     It uses WebRTC's VAD (Voice Activity Detection) to determine when speech occurs.
-#     Recording stops after about 1.5 seconds of silence. The captured audio frames are
-#     concatenated and returned as a NumPy array.
-#
-#     Returns:
-#     np.ndarray: A 1D numpy array containing the audio signal captured from the microphone.
-#     """
-#     vad = webrtcvad.Vad()
-#     vad.set_mode(1)
-#
-#     p = pyaudio.PyAudio()
-#     sample_rate = 16000
-#     chunk_duration = 30
-#     chunk_size = int(sample_rate * chunk_duration / 1000)
-#
-#     stream = p.open(
-#         format=pyaudio.paInt16,
-#         channels=1,
-#         rate=sample_rate,
-#         input=True,
-#         frames_per_buffer=chunk_size,
-#     )
-#
-#     frames = []
-#     num_silent_chunks = 0
-#     got_speech = False
-#     print("Listening...")
-#
-#     while True:
-#         try:
-#             chunk = stream.read(chunk_size)
-#             chunk_np = np.frombuffer(chunk, dtype=np.int16)
-#
-#             is_speech = vad.is_speech(chunk, sample_rate)
-#
-#             if got_speech and not is_speech:
-#                 num_silent_chunks += 1
-#             elif is_speech:
-#                 got_speech = True
-#                 num_silent_chunks = 0  # Reset counter when speech is detected
-#                 frames.append(chunk_np)
-#
-#             # If num_silent_chunks reaches 50 (or about 1.5 seconds of silence), end the recording
-#             if num_silent_chunks > 50:
-#                 print("Detected silence. Stopping recording...")
-#                 break
-#         except KeyboardInterrupt:
-#             break
-#
-#     # Close the stream
-#     stream.stop_stream()
-#     stream.close()
-#     p.terminate()
-#
-#     return np.concatenate(frames, axis=0)
-
-
 def listen() -> np.ndarray:
+    """
+     Listens to audio input from the default microphone, detects speech using VAD (Voice Activity Detection),
+    and stops recording upon detecting silence for a specific duration or if 'q' is pressed. The captured
+    audio is returned as a NumPy array.
+
+    The function starts a separate thread for recording audio while monitoring the keyboard for a stop
+    signal (pressing 'q') in the main thread.
+
+    Returns:
+        np.ndarray: A 1D numpy array containing the recorded audio data.
+    """
     frames = []
     got_speech = False
     num_silent_chunks = 0
