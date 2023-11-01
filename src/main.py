@@ -38,4 +38,8 @@ else:
 # NLP working here...
 
 stt = ds.stt(speech)
+print(stt)
 audio_mgmt.speak(stt)
+
+chato_customer_db.close()
+chato_audio_db.close()

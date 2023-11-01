@@ -114,7 +114,9 @@ def match_face(current_face: Union[str, None] = None, *, cursor):
 
 
 def handle_new_customer():
-    pass
+    # Implementation Pending
+    return 9999, 'New Customer'
+
 
 # PENDING IMMEDIATELY
 # Modify read_encodings_from_database() to process in batches
