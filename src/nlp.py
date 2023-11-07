@@ -13,6 +13,9 @@ lookup_table = {...}  # Your lookup table JSON
 
 # Convert your data into the IOB format
 def convert_to_iob(data, lookup_table):
+    '''
+    This is just a placeholder function, it needs way more improvement to adapt to the actual data structure.
+    '''
     tokenized_data = []
 
     for instance in data['instances']:

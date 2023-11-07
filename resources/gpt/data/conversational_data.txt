@@ -1,0 +1,6 @@
+Customer: I'd like to order a pizza.
+System: Sure, what toppings would you like on that?
+Customer: Can I get a medium coffee, black, no sugar.
+System: Of course, would you like anything else?
+Customer: What salads do you have today?
+System: We have a Caesar salad, a garden salad, and a Greek salad. Which one would you prefer?
