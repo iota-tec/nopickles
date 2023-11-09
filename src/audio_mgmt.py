@@ -28,6 +28,10 @@ def convert_file_to_16k(filename: str) -> Union[AudioSegment, str]:
 
         # Set the frame rate to 16K and channels to 1
         return audio.set_frame_rate(16000).set_channels(1)
+    elif filename.endswith('.m4a'):
+        audio = AudioSegment.from_file(filename, format="m4a")
+        return audio.set_frame_rate(16000).set_channels(1)
+
     else:
         return "Unsupported file format. Only '.wav' files are supported."
 
@@ -68,9 +72,9 @@ def store_into_database(file: str, transcript: str, cursor: Any) -> None:
 
 
 # This is for training
-def read_wav_from_database(file_id: int, cursor: Any) -> Tuple[np.ndarray, str, int]:
+def read_audio_from_database(file_id: int, cursor: Any) -> Tuple[np.ndarray, str, int]:
     """
-    Reads a .wav audio file, its transcript, and meta data from the database by file ID.
+    Reads an audio file, its transcript, and meta data from the database by file ID.
 
     Args:
         file_id (int): The ID of the audio file to be read from the database.
