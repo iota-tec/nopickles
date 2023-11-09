@@ -1,0 +1,5 @@
+{
+    "beverage_size": ["small", "medium", "large", "extra large"],
+    "beverage_type": ["coffee", "iced capp", "latte", "tea", "hot chocolate", "french vanilla"],
+    "food_item": ["donut", "muffin", "bagel", "Timbits", "sandwich", "croissant"]
+}

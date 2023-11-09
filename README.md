@@ -37,7 +37,7 @@ Chatopotamus is an innovative solution designed to streamline order management a
 ### Usage
 1. Run the main script to start the application:
    ```bash
-   python src\main.py
+   python src/main.py
    ```
 2. Follow the on-screen instructions to interact with Chatopotamus.
 

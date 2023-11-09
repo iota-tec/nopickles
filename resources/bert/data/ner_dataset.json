@@ -1,0 +1,16 @@
+{
+  "instances": [
+    {
+      "sentence": "I ordered a medium double-double and a Boston Cream donut from Tim Hortons",
+      "beverage_size": "medium",
+      "beverage_type": "double-double",
+      "food_item": "Boston Cream donut"
+    },
+    {
+      "sentence": "Can I get a Turkey Bacon Club Sandwich and a small Iced Capp?",
+      "food_item": "Turkey Bacon Club Sandwich",
+      "beverage_size": "small",
+      "beverage_type": "Iced Capp"
+    }
+  ]
+}
