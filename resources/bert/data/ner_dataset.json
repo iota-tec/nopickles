@@ -1,16 +1,344 @@
 {
   "instances": [
     {
-      "sentence": "I ordered a medium double-double and a Boston Cream donut from Tim Hortons",
+      "sentence": "i ordered a medium double-double and a boston cream donut from tim hortons",
+      "beverage": "",
       "beverage_size": "medium",
-      "beverage_type": "double-double",
-      "food_item": "Boston Cream donut"
+      "beverage_complain": "",
+      "beverage_modifier": "double-double",
+      "food": "donut",
+      "food_modifier": "boston cream",
+      "food_complain": ""
     },
     {
-      "sentence": "Can I get a Turkey Bacon Club Sandwich and a small Iced Capp?",
-      "food_item": "Turkey Bacon Club Sandwich",
+      "sentence": "I ordered a medium double-double and a Boston cream donut from Tim Hortons.",
+      "beverage": "",
+      "beverage_size": "medium",
+      "beverage_complain": "",
+      "beverage_modifier": "double-double",
+      "food": "donut",
+      "food_modifier": "Boston cream",
+      "food_complain": ""
+    },
+    {
+      "sentence": "I ordered a medium double-double and a Boston cream donut from Tim Hortons.",
+      "beverage": "",
+      "beverage_size": "medium",
+      "beverage_complain": "",
+      "beverage_modifier": "double-double",
+      "food": "donut",
+      "food_modifier": "Boston cream",
+      "food_complain": ""
+    },
+    {
+      "sentence": "I'll take a large mocha with extra shot and a toasted bagel with butter.",
+      "beverage": "mocha",
+      "beverage_size": "large",
+      "beverage_complain": "",
+      "beverage_modifier": "extra shot",
+      "food": "bagel",
+      "food_modifier": "toasted with butter",
+      "food_complain": ""
+    },
+    {
+      "sentence": "Give me a hot chocolate, no whipped topping, and a grilled cheese sandwich.",
+      "beverage": "hot chocolate",
+      "beverage_size": "",
+      "beverage_complain": "",
+      "beverage_modifier": "no whipped topping",
+      "food": "grilled cheese sandwich",
+      "food_modifier": "",
+      "food_complain": ""
+    },
+    {
+      "sentence": "I'd like a small dark roast coffee with soy milk and a muffin with extra filling.",
+      "beverage": "coffee",
       "beverage_size": "small",
-      "beverage_type": "Iced Capp"
+      "beverage_complain": "",
+      "beverage_modifier": "soy milk",
+      "food": "muffin",
+      "food_modifier": "extra filling",
+      "food_complain": ""
+    },
+    {
+      "sentence": "Can you get me an iced coffee with sugar-free syrup and a croissant with no sauce?",
+      "beverage": "iced coffee",
+      "beverage_size": "",
+      "beverage_complain": "",
+      "beverage_modifier": "sugar-free syrup",
+      "food": "croissant",
+      "food_modifier": "no sauce",
+      "food_complain": ""
+    },
+    {
+      "sentence": "I need a medium latte, extra hot, and a panini with extra bacon.",
+      "beverage": "latte",
+      "beverage_size": "medium",
+      "beverage_complain": "",
+      "beverage_modifier": "extra hot",
+      "food": "panini",
+      "food_modifier": "extra bacon",
+      "food_complain": ""
+    },
+    {
+      "sentence": "Give me a large french vanilla with whipped topping and timbits.",
+      "beverage": "french vanilla",
+      "beverage_size": "large",
+      "beverage_complain": "",
+      "beverage_modifier": "whipped topping",
+      "food": "timbits",
+      "food_modifier": "",
+      "food_complain": ""
+    },
+    {
+      "sentence": "I want a small espresso and a BLT sandwich with no tomato.",
+      "beverage": "espresso",
+      "beverage_size": "small",
+      "beverage_complain": "",
+      "beverage_modifier": "",
+      "food": "BLT sandwich",
+      "food_modifier": "no tomato",
+      "food_complain": ""
+    },
+    {
+      "sentence": "I ordered a medium iced cappuccino and a chicken wrap with extra sauce.",
+      "beverage": "iced cappuccino",
+      "beverage_size": "medium",
+      "beverage_complain": "",
+      "beverage_modifier": "",
+      "food": "chicken wrap",
+      "food_modifier": "extra sauce",
+      "food_complain": ""
+    },
+    {
+      "sentence": "I'll take a large latte with extra shot and a toasted bagel with butter.",
+      "beverage": "latte",
+      "beverage_size": "large",
+      "beverage_complain": "",
+      "beverage_modifier": "extra shot",
+      "food": "bagel",
+      "food_modifier": "toasted with butter",
+      "food_complain": ""
+    },
+    {
+      "sentence": "Give me a hot chocolate, no whipped topping, and a grilled cheese sandwich.",
+      "beverage": "hot chocolate",
+      "beverage_size": "",
+      "beverage_complain": "",
+      "beverage_modifier": "no whipped topping",
+      "food": "grilled cheese sandwich",
+      "food_modifier": "",
+      "food_complain": ""
+    },
+    {
+      "sentence": "I'd like a small dark roast coffee with soy milk and a muffin with extra filling.",
+      "beverage": "dark roast coffee",
+      "beverage_size": "small",
+      "beverage_complain": "",
+      "beverage_modifier": "soy milk",
+      "food": "muffin",
+      "food_modifier": "extra filling",
+      "food_complain": ""
+    },
+    {
+      "sentence": "Can you get me an iced coffee with sugar-free syrup and a croissant with no sauce?",
+      "beverage": "iced coffee",
+      "beverage_size": "",
+      "beverage_complain": "",
+      "beverage_modifier": "sugar-free syrup",
+      "food": "croissant",
+      "food_modifier": "no sauce",
+      "food_complain": ""
+    },
+    {
+      "sentence": "I need a medium latte, extra hot, and a panini with extra bacon.",
+      "beverage": "latte",
+      "beverage_size": "medium",
+      "beverage_complain": "",
+      "beverage_modifier": "extra hot",
+      "food": "panini",
+      "food_modifier": "extra bacon",
+      "food_complain": ""
+    },
+    {
+      "sentence": "Give me a large french vanilla with whipped topping and timbits.",
+      "beverage": "french vanilla",
+      "beverage_size": "large",
+      "beverage_complain": "",
+      "beverage_modifier": "whipped topping",
+      "food": "timbits",
+      "food_modifier": "",
+      "food_complain": ""
+    },
+    {
+      "sentence": "I want a small espresso and a BLT sandwich with no tomato.",
+      "beverage": "espresso",
+      "beverage_size": "small",
+      "beverage_complain": "",
+      "beverage_modifier": "",
+      "food": "BLT sandwich",
+      "food_modifier": "no tomato",
+      "food_complain": ""
+    },
+    {
+      "sentence": "I ordered a medium iced cappuccino and a chicken wrap with extra sauce.",
+      "beverage": "iced cappuccino",
+      "beverage_size": "medium",
+      "beverage_complain": "",
+      "beverage_modifier": "",
+      "food": "chicken wrap",
+      "food_modifier": "extra sauce",
+      "food_complain": ""
+    },
+    {
+      "sentence": "I'll take a small tea and a bagel with cream cheese.",
+      "beverage": "tea",
+      "beverage_size": "small",
+      "beverage_complain": "",
+      "beverage_modifier": "",
+      "food": "bagel",
+      "food_modifier": "with cream cheese",
+      "food_complain": ""
+    },
+    {
+      "sentence": "Give me a large mocha with soy milk and a turkey bacon club sandwich.",
+      "beverage": "mocha",
+      "beverage_size": "large",
+      "beverage_complain": "",
+      "beverage_modifier": "soy milk",
+      "food": "turkey bacon club sandwich",
+      "food_modifier": "",
+      "food_complain": ""
+    },
+    {
+      "sentence": "I'd like a medium iced coffee with extra shot and a muffin with no topping.",
+      "beverage": "iced coffee",
+      "beverage_size": "medium",
+      "beverage_complain": "",
+      "beverage_modifier": "extra shot",
+      "food": "muffin",
+      "food_modifier": "no topping",
+      "food_complain": ""
+    },
+    {
+      "sentence": "Can I get a large cappuccino and a grilled cheese sandwich with extra bacon?",
+      "beverage": "cappuccino",
+      "beverage_size": "large",
+      "beverage_complain": "",
+      "beverage_modifier": "",
+      "food": "grilled cheese sandwich",
+      "food_modifier": "extra bacon",
+      "food_complain": ""
+    },
+    {
+      "sentence": "I'll take a small tea with sugar-free syrup and a croissant with extra filling.",
+      "beverage": "tea",
+      "beverage_size": "small",
+      "beverage_complain": "",
+      "beverage_modifier": "sugar-free syrup",
+      "food": "croissant",
+      "food_modifier": "extra filling",
+      "food_complain": ""
+    },
+    {
+      "sentence": "Give me a hot chocolate, no whipped topping, and a chicken wrap with extra sauce.",
+      "beverage": "hot chocolate",
+      "beverage_size": "",
+      "beverage_complain": "",
+      "beverage_modifier": "no whipped topping",
+      "food": "chicken wrap",
+      "food_modifier": "extra sauce",
+      "food_complain": ""
+    },
+    {
+      "sentence": "I'd like a large dark roast coffee with soy milk and a toasted bagel with butter.",
+      "beverage": "dark roast coffee",
+      "beverage_size": "large",
+      "beverage_complain": "",
+      "beverage_modifier": "soy milk",
+      "food": "bagel",
+      "food_modifier": "toasted with butter",
+      "food_complain": ""
+    },
+    {
+      "sentence": "Can you get me an iced capp and a turkey bacon club sandwich with no tomato.",
+      "beverage": "iced capp",
+      "beverage_size": "",
+      "beverage_complain": "",
+      "beverage_modifier": "",
+      "food": "turkey bacon club sandwich",
+      "food_modifier": "no tomato",
+      "food_complain": ""
+    },
+    {
+      "sentence": "I need a medium latte with extra shot and a BLT sandwich.",
+      "beverage": "latte",
+      "beverage_size": "medium",
+      "beverage_complain": "",
+      "beverage_modifier": "extra shot",
+      "food": "BLT sandwich",
+      "food_modifier": "",
+      "food_complain": ""
+    },
+    {
+      "sentence": "Give me a small mocha with whipped topping and timbits.",
+      "beverage": "mocha",
+      "beverage_size": "small",
+      "beverage_complain": "",
+      "beverage_modifier": "whipped topping",
+      "food": "timbits",
+      "food_modifier": "",
+      "food_complain": ""
+    },
+    {
+      "sentence": "I want a large latte, extra hot, and a panini with extra bacon.",
+      "beverage": "latte",
+      "beverage_size": "large",
+      "beverage_complain": "",
+      "beverage_modifier": "extra hot",
+      "food": "panini",
+      "food_modifier": "extra bacon",
+      "food_complain": ""
+    },
+    {
+      "sentence": "I ordered a small iced coffee and a grilled cheese sandwich with no sauce.",
+      "beverage": "iced coffee",
+      "beverage_size": "small",
+      "beverage_complain": "",
+      "beverage_modifier": "",
+      "food": "grilled cheese sandwich",
+      "food_modifier": "no sauce",
+      "food_complain": ""
+    },
+    {
+      "sentence": "Cap it off with a small hot chocolate, dark roast, and a dash of skim milk.",
+      "beverage": "hot chocolate",
+      "beverage_size": "small",
+      "beverage_complain": "",
+      "beverage_modifier": "dark roast with skim milk",
+      "food": "",
+      "food_modifier": "",
+      "food_complain": ""
+    },
+    {
+      "sentence": "I'm also in the mood for a Grilled Cheese panini, toasted, and with extra cheese.",
+      "beverage": "",
+      "beverage_size": "",
+      "beverage_complain": "",
+      "beverage_modifier": "",
+      "food": "Grilled Cheese panini",
+      "food_modifier": "toasted with extra cheese",
+      "food_complain": ""
+    },
+    {
+      "sentence": "I'll start with a large hot chocolate, an extra shot, and whipped topping.",
+      "beverage": "hot chocolate",
+      "beverage_size": "large",
+      "beverage_complain": "",
+      "beverage_modifier": "extra shot",
+      "food": "",
+      "food_modifier": "",
+      "food_complain": ""
     }
   ]
 }
