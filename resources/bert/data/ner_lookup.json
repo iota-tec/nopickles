@@ -1,6 +1,6 @@
 {
   "entities": {
-      "beverage": ["coffee", "iced coffee", "iced capp", "cappuccino","latte", "tea", "hot chocolate", "french vanilla", "white chocolate", "mocha", "espresso", "americano"],
+      "beverage": ["coffee", "iced coffee", "iced capp", "cappuccino","latte", "tea", "hot chocolate", "french vanilla", "white chocolate", "mocha", "iced mocha", "espresso", "americano"],
       "beverage_size": ["small", "medium", "large", "extra large"],
       "beverage_modifier": ["extra shot", "skim milk", "soy milk", "sugar-free", "whipped topping", "double double", "triple triple", "dark roast"],
       "beverage_complain": ["too bitter", "too hot", "too cold", "wrong order", "too sweet"],
