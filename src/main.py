@@ -1,8 +1,6 @@
 import deepspeech
 import mysql.connector
-import audio_mgmt
-import face_mgmt
-import nlp
+from src import audio_mgmt, face_mgmt, nlp
 
 ds = deepspeech.Model('../resources/deepspeech/pretrained/deepspeech-0.9.3-models.pbmm')
 
