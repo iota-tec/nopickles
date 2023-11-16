@@ -1,1 +1,1 @@
-__all__ = ['audio_mgmt', 'face_mgmt']
+__all__ = ['audio_mgmt', 'face_mgmt', 'nlp']
