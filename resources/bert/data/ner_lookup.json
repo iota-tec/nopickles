@@ -4,9 +4,9 @@
       "beverage_size": ["small", "medium", "large", "extra large"],
       "beverage_modifier": ["extra shot", "skim milk", "soy milk", "sugar-free", "whipped topping", "double double", "triple triple", "dark roast"],
       "beverage_complain": ["too bitter", "too hot", "too cold", "wrong order", "too sweet"],
-      "food": ["Turkey Bacon Club", "BLT", "Grilled Cheese", "Chicken Wrap", "Soup", "donut", "muffin", "bagel", "timbits", "panini", "croissant"],
-      "food_modifier": ["toasted", "with butter", "with cream cheese", "no topping", "extra filling", "no sauce", "extra bacon", "no tomato", "extra sauce", "no bacon", "grilled", "no mayo"],
-      "food_complain": ["not fresh", "too dry", "missing ingredients", "not toasted enough", "wrong item"]
+      "food": ["Turkey Bacon", "BLT", "Grilled Cheese", "Chicken Wrap", "Soup", "donut", "muffin", "bagel", "timbits", "panini", "croissant"],
+      "food_modifier": ["toasted", "butter", "cream cheese", "no topping", "extra filling", "no sauce", "extra bacon", "no tomato", "extra sauce", "no bacon", "grilled", "no mayo"],
+      "food_complain": ["not fresh", "too dry", "missing ingredients", "not toasted", "wrong item"]
   },
   "intents": ["order", "complain", "inquiry", "feedback"],
   "prices": {"coffee": 1.50, "cappuccino": 2.50, "iced coffee": 2, "iced capp": 2.25, "latte": 2, "tea": 1.50, "hot chocolate": 2.25, "french vanilla": 2.25, "white chocolate": 2.25,
