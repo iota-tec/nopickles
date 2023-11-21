@@ -1,27 +1,7 @@
 {
   "instances": [
     {
-      "sentence": "i ordered a medium double-double and a boston cream donut from tim hortons",
-      "beverage": "",
-      "beverage_size": "medium",
-      "beverage_complain": "",
-      "beverage_modifier": "double-double",
-      "food": "donut",
-      "food_modifier": "boston cream",
-      "food_complain": ""
-    },
-    {
-      "sentence": "I ordered a medium double-double and a Boston cream donut from Tim Hortons.",
-      "beverage": "",
-      "beverage_size": "medium",
-      "beverage_complain": "",
-      "beverage_modifier": "double-double",
-      "food": "donut",
-      "food_modifier": "Boston cream",
-      "food_complain": ""
-    },
-    {
-      "sentence": "I ordered a medium double-double and a Boston cream donut from Tim Hortons.",
+      "sentence": "I ordered a medium double double and a Boston cream donut from Tim Hortons.",
       "beverage": "",
       "beverage_size": "medium",
       "beverage_complain": "",
