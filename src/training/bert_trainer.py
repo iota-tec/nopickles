@@ -1,6 +1,7 @@
 from typing import List, Tuple
 import re
 import tensorflow as tf
+import numpy as np
 
 
 def convert_to_IOB(dataset, lookup):
@@ -121,7 +122,7 @@ def preprocess_for_training(final_data, max_seq_length, batch_size=32, shuffle_b
                                                             'attention_mask': attention_masks,
                                                         }, tf.one_hot(labels, depth=15)))
 
-    return train_dataset.shuffle(shuffle_buffer_size).batch(batch_size).prefetch(1)
+    return train_dataset.batch(batch_size).prefetch(1), label_map
 
 
 class F1Score(tf.keras.metrics.Metric):
@@ -141,7 +142,84 @@ class F1Score(tf.keras.metrics.Metric):
     def result(self):
         return self.f1_score
 
-    def reset_states(self):
+    def reset_state(self):
         self.precision.reset_states()
         self.recall.reset_states()
         self.f1_score.assign(0)
+
+
+def preprocess_for_prediction(text, tokenizer, label_map, max_seq_length):
+    def tokenize_and_align_labels(sentence, tokenizer, label_map):
+        # Split the sentence into words
+        words = sentence.split(' ')
+        tokenized_input = tokenizer(words, return_tensors="pt", is_split_into_words=True)
+        tokens = tokenized_input.tokens()
+        token_ids = tokenized_input['input_ids'][0]
+
+        # Initialize the tags as 'O' for each token
+        tags = ['O'] * len(words)
+        aligned_tags = []
+
+        current_word = 0
+        for idx, token in enumerate(tokens):
+            if token in ["[CLS]", "[SEP]"]:
+                continue
+
+            if token.startswith("##"):
+                tag = aligned_tags[-1][1]
+            else:
+                tag = tags[current_word]
+                current_word += 1
+
+            aligned_tags.append((token, tag, token_ids[idx].item()))
+
+        return aligned_tags
+
+    # Clean and prepare the text
+    clean_text = re.sub(r'[^\w\s]', '', text).lower()
+    aligned_sentence = tokenize_and_align_labels(clean_text, tokenizer, label_map)
+
+    # Prepare the data for prediction
+    sentence_ids = [token_id for token, _, token_id in aligned_sentence]
+    padding_length = max_seq_length - len(sentence_ids)
+
+    # Pad the sequences
+    sentence_ids.extend([0] * padding_length)
+    attention_mask = [1] * len(aligned_sentence) + [0] * padding_length
+
+    # Truncate if necessary
+    input_ids = sentence_ids[:max_seq_length]
+    attention_mask = attention_mask[:max_seq_length]
+
+    # Convert to the appropriate format for the model
+    prediction_input = {
+        'input_ids': tf.expand_dims(tf.constant(input_ids, dtype=tf.int32), 0),
+        'attention_mask': tf.expand_dims(tf.constant(attention_mask, dtype=tf.int32), 0)
+    }
+
+    return prediction_input
+
+
+# to shift in nlp.py
+def predict_labels(text: str, tokenizer, model, label_map: dict, max_seq_length: int):
+    # Preprocess the text
+    prediction_input = preprocess_for_prediction(text, tokenizer, label_map, max_seq_length)
+
+    # Predict using the model
+    prediction_output = model.predict(prediction_input)
+
+    # Extract logits and get the highest probability labels
+    logits = prediction_output[0]
+    label_indices = np.argmax(logits, axis=-1)
+
+    # Reverse the label_map to get labels from indices
+    reverse_label_map = {v: k for k, v in label_map.items()}
+
+    # Tokens and labels
+    tokens = tokenizer.tokenize(tokenizer.decode(prediction_input['input_ids'][0]))
+    predicted_labels = [reverse_label_map[idx] for idx in label_indices[0][:len(tokens)]]
+
+    # Filter out padding tokens
+    token_label_pairs = [(token, label) for token, label in zip(tokens, predicted_labels) if token != '[PAD]']
+
+    return token_label_pairs
