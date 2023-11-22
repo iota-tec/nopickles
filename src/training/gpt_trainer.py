@@ -6,9 +6,6 @@ import re
 import os
 import numpy as np
 
-model = TFGPT2LMHeadModel.from_pretrained('gpt2')
-tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
-
 
 def convert_to_sets(file_path):
     sets_of_eight = []
@@ -18,8 +15,14 @@ def convert_to_sets(file_path):
         all_lines = f.readlines()
 
     for i, line in enumerate(all_lines):
-        # Trim the newline character from the end of the line and convert to lower case
-        line = line.rstrip('\n').lower()
+        # Check if the line starts with 'Customer:'
+        if line.lower().startswith('customer:'):
+            # Lowercase the entire line and remove specific punctuations
+            line = line.lower()
+            line = line.replace(',', '').replace('.', '')
+
+        # Trim the newline character from the end of the line
+        line = line.rstrip('\n')
 
         # Replace prices with <price> tag
         line = re.sub(r'\$\d+(\.\d{2})?', '<price>', line)
@@ -27,7 +30,7 @@ def convert_to_sets(file_path):
         if i > 0:
             # Extract the first word (speaker) of the current and previous lines
             speaker_current = line.split(':')[0]
-            speaker_previous = all_lines[i - 1].rstrip('\n').lower().split(':')[0]
+            speaker_previous = all_lines[i - 1].rstrip('\n').split(':')[0]
 
             # Check if the current line has a different speaker than the previous line
             if speaker_current != speaker_previous:
