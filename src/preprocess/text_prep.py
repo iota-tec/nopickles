@@ -8,7 +8,7 @@ import nltk
 from nltk.translate.bleu_score import sentence_bleu
 
 
-def convert_to_sets(file_path, length=7):
+def convert_to_sets(file_path, length=2):
     sets_of_lines = []
     current_set = []
 
@@ -47,7 +47,7 @@ def convert_to_sets(file_path, length=7):
     return sets_of_lines
 
 
-def file_to_sequences(file_path, intent, length=7):
+def file_to_sequences(file_path, intent, length=2):
     sets_of_lines = convert_to_sets(file_path, length)
     processed_sequences = []
     intents = []
@@ -88,13 +88,13 @@ def preprocess_for_generation(final_sequences, tokenizer=None, train=True):
              {
                  'input_ids': input_ids_Y
              }
-        ))
+            ))
     else:
         # For inference, provide input IDs and attention masks
         dataset = tf.data.Dataset.from_tensor_slices(tokenized_data)
 
     # Prefetch data for efficient loading
-    return dataset.shuffle(1000).batch(32).prefetch(1)
+    return dataset.shuffle(1000).batch(16).prefetch(1)
 
 
 def ordinal_encode(intents, intent_to_label=None):
@@ -140,21 +140,58 @@ def preprocess_for_intent(final_sequences, intents, tokenizer=None, train=True):
     attention_mask = tokenized_data['attention_mask']
 
     dataset = tf.data.Dataset.from_tensor_slices({
-                                                    "input_ids": input_ids,
-                                                    "attention_mask": attention_mask
-                                                  })
+        "input_ids": input_ids,
+        "attention_mask": attention_mask
+    })
 
     # at prediction time
     if not train:
-        return dataset.shuffle(1000).batch(32).prefetch(1)
+        return dataset.shuffle(10000).batch(16).prefetch(1)
 
     # at training time
     intents, _ = ordinal_encode(intents)
     intents = tf.data.Dataset.from_tensor_slices(intents).map(lambda intent: tf.one_hot(intent, 3))
     dataset = tf.data.Dataset.zip((dataset, intents))
-    return dataset.shuffle(1000).batch(32).prefetch(1)
+    return dataset.shuffle(10000).batch(16).prefetch(1)
 
 
 def save_file(filepath, value):
     with open(filepath, 'wb') as f:
         joblib.dump(value, f)
+
+
+class OneCycleLRSchedule(tf.keras.callbacks.Callback):
+    def __init__(self, max_lr, total_steps, lr_start=1e-5, lr_end=1e-6, div_factor=25, pct_start=0.3):
+        super(OneCycleLRSchedule, self).__init__()
+
+        self.max_lr = max_lr  # Maximum learning rate (peak)
+        self.lr_start = lr_start  # Initial learning rate
+        self.lr_end = lr_end  # Final learning rate
+        self.div_factor = div_factor  # Factor to divide max_lr for the minimum
+        self.pct_start = pct_start  # Phase 1 percentage
+        self.total_steps = total_steps  # Total steps in the cycle
+
+        self.phase_1_steps = np.floor(pct_start * total_steps)  # Steps in the first phase
+        self.phase_2_steps = total_steps - self.phase_1_steps  # Steps in the second phase
+
+    def on_train_begin(self, logs=None):
+        self.set_lr(self.lr_start)
+
+    def on_train_batch_begin(self, batch, logs=None):
+        if batch < self.phase_1_steps:
+            # Phase 1: Linearly increase the learning rate
+            lr = (self.max_lr - self.lr_start) / self.phase_1_steps * batch + self.lr_start
+        else:
+            # Phase 2: Cosine annealing to the final learning rate
+            progress = (batch - self.phase_1_steps) / self.phase_2_steps
+            lr = self.lr_end + 0.5 * (self.max_lr - self.lr_end) * (1 + np.cos(np.pi * progress))
+        self.set_lr(lr)
+
+    def on_epoch_end(self, epoch, logs=None):
+        print(self.model.optimizer.lr)
+
+    def set_lr(self, lr):
+        tf.keras.backend.set_value(self.model.optimizer.lr, lr)
+
+    def get_lr(self):
+        return tf.keras.backend.get_value(self.model.optimizer.lr)
