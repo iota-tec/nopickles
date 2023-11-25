@@ -23,7 +23,7 @@ face_id, person_name = face_mgmt.match_face(cursor=customer_cursor)
 
 print(person_name)
 if person_name:
-    audio_mgmt.speak(f'Hi {person_name}, how can I help you today?')
+    audio_mgmt.speak(f'Hi {person_name}, what can I get for you today?')
     request = audio_mgmt.speech_to_text()  # Customer spoke this
 else:
     audio_mgmt.speak(f'Hi, how can I help you today?')
