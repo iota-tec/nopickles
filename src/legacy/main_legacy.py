@@ -3,7 +3,7 @@ import mysql.connector
 from src import audio_mgmt, face_mgmt, nlp
 import legacy
 
-ds = deepspeech.Model('../resources/deepspeech/pretrained/deepspeech-0.9.3-models.pbmm')
+ds = deepspeech.Model('../resources/deepspeech/saved/deepspeech-0.9.3-models.pbmm')
 
 chato_audio_db = mysql.connector.connect(
     host='localhost',

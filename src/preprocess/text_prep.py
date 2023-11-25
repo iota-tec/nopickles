@@ -130,9 +130,9 @@ def ordinal_encode(intents, intent_to_label=None):
     return intent_labels, intent_to_label
 
 
-def preprocess_for_intent(final_sequences, intents, tokenizer=None, train=True):
+def preprocess_for_intent(final_sequences, intents=None, tokenizer=None, train=True):
     if tokenizer:
-        tokenized_data = tokenizer(final_sequences, max_length=150, truncation=True, padding=True, return_tensors="tf")
+        tokenized_data = tokenizer(final_sequences, max_length=40, truncation=True, padding='max_length', return_tensors="tf")
     else:
         tokenized_data = final_sequences
 

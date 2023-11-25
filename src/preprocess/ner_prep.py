@@ -62,9 +62,9 @@ def convert_to_IOB(dataset, lookup):
 
 def align_tokens_and_tags(sentence: str, tags: List[str], tokenizer) -> List[Tuple[str, str, int]]:
     words = sentence.split(' ')
-    tokenized_input = tokenizer(words, return_tensors="pt", is_split_into_words=True)
+    tokenized_input = tokenizer(words, return_tensors="tf", is_split_into_words=True)
     tokens = tokenized_input.tokens()
-    token_ids = tokenized_input['input_ids'][0]  # Extracting the token IDs
+    token_ids = tokenized_input['input_ids'][0].numpy() # Extracting the token IDs
 
     aligned_tags = []
     current_word = 0
@@ -84,7 +84,7 @@ def align_tokens_and_tags(sentence: str, tags: List[str], tokenizer) -> List[Tup
             current_word += 1
 
         # Append the token, its tag, and its integer token ID to the list
-        aligned_tags.append((token, tag, token_ids[idx].item()))
+        aligned_tags.append((token, tag, token_ids[idx]))
 
     return aligned_tags
 
@@ -96,7 +96,7 @@ def preprocess_for_training(final_data, max_seq_length, batch_size=32, shuffle_b
     labels = []
 
     # Unique label mapping, including -100 for ignored index (padding)
-    unique_labels = set(tag for sentence in final_data for _, tag, _ in sentence)
+    unique_labels = sorted(set(tag for sentence in final_data for _, tag, _ in sentence))
     label_map = {label: i for i, label in enumerate(unique_labels)}
     label_map[-100] = -100
 
@@ -148,13 +148,13 @@ class F1Score(tf.keras.metrics.Metric):
         self.f1_score.assign(0)
 
 
-def preprocess_for_prediction(text, tokenizer, label_map, max_seq_length):
+def preprocess_for_prediction(text, tokenizer, label_map, max_seq_length=26):
     def tokenize_and_align_labels(sentence, tokenizer, label_map):
         # Split the sentence into words
         words = sentence.split(' ')
-        tokenized_input = tokenizer(words, return_tensors="pt", is_split_into_words=True)
+        tokenized_input = tokenizer(words, return_tensors="tf", truncation=True, padding=True, max_length=26, is_split_into_words=True)
         tokens = tokenized_input.tokens()
-        token_ids = tokenized_input['input_ids'][0]
+        token_ids = tokenized_input['input_ids'][0].numpy()
 
         # Initialize the tags as 'O' for each token
         tags = ['O'] * len(words)
@@ -171,7 +171,7 @@ def preprocess_for_prediction(text, tokenizer, label_map, max_seq_length):
                 tag = tags[current_word]
                 current_word += 1
 
-            aligned_tags.append((token, tag, token_ids[idx].item()))
+            aligned_tags.append((token, tag, token_ids[idx]))
 
         return aligned_tags
 
@@ -198,28 +198,3 @@ def preprocess_for_prediction(text, tokenizer, label_map, max_seq_length):
     }
 
     return prediction_input
-
-
-# to shift in nlp.py
-def predict_labels(text: str, tokenizer, model, label_map: dict, max_seq_length: int):
-    # Preprocess the text
-    prediction_input = preprocess_for_prediction(text, tokenizer, label_map, max_seq_length)
-
-    # Predict using the model
-    prediction_output = model.predict(prediction_input)
-
-    # Extract logits and get the highest probability labels
-    logits = prediction_output[0]
-    label_indices = np.argmax(logits, axis=-1)
-
-    # Reverse the label_map to get labels from indices
-    reverse_label_map = {v: k for k, v in label_map.items()}
-
-    # Tokens and labels
-    tokens = tokenizer.tokenize(tokenizer.decode(prediction_input['input_ids'][0]))
-    predicted_labels = [reverse_label_map[idx] for idx in label_indices[0][:len(tokens)]]
-
-    # Filter out padding tokens
-    token_label_pairs = [(token, label) for token, label in zip(tokens, predicted_labels) if token != '[PAD]']
-
-    return token_label_pairs
