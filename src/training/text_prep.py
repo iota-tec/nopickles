@@ -1,10 +1,11 @@
-from transformers import GPT2Tokenizer, TFGPT2LMHeadModel
 import tensorflow as tf
 import os
 import joblib
 import re
 import os
 import numpy as np
+import nltk
+from nltk.translate.bleu_score import sentence_bleu
 
 
 def convert_to_sets(file_path, length=7):
@@ -75,10 +76,9 @@ def preprocess_for_generation(final_sequences, tokenizer=None, train=True):
         attention_mask = tokenized_data['attention_mask']
 
         # Slice input and attention mask for X and Y
-        input_ids_X = input_ids[:, :-10]
-        input_ids_Y = input_ids[:, 10:]
-        attention_mask_X = attention_mask[:, :-10]
-        attention_mask_Y = attention_mask[:, 10:]
+        input_ids_X = input_ids[:, :-1]
+        input_ids_Y = input_ids[:, 1:]
+        attention_mask_X = attention_mask[:, :-1]
 
         dataset = tf.data.Dataset.from_tensor_slices(
             ({
@@ -86,10 +86,9 @@ def preprocess_for_generation(final_sequences, tokenizer=None, train=True):
                  'attention_mask': attention_mask_X
              },
              {
-                 'input_ids': input_ids_Y,
-                 'attention_mask': attention_mask_Y
-             })
-        )
+                 'input_ids': input_ids_Y
+             }
+        ))
     else:
         # For inference, provide input IDs and attention masks
         dataset = tf.data.Dataset.from_tensor_slices(tokenized_data)
@@ -115,11 +114,11 @@ def ordinal_encode(intents, intent_to_label=None):
     if intent_to_label is None:
         # Create a default vocabulary table if not provided
         lookup_init = tf.lookup.KeyValueTensorInitializer(
-                keys=[b'order', b'complain', b'enquiry'],
-                values=[0,1,2],
-                key_dtype=tf.string,
-                value_dtype=tf.int64,
-            )
+            keys=[b'order', b'complain', b'enquiry'],
+            values=[0, 1, 2],
+            key_dtype=tf.string,
+            value_dtype=tf.int64,
+        )
         intent_to_label = tf.lookup.StaticVocabularyTable(
             lookup_init,
             num_oov_buckets=1,
@@ -131,14 +130,19 @@ def ordinal_encode(intents, intent_to_label=None):
     return intent_labels, intent_to_label
 
 
-def preprocessing_for_intent(final_sequences, intents, tokenizer=None, train=True):
+def preprocess_for_intent(final_sequences, intents, tokenizer=None, train=True):
     if tokenizer:
-        tokenizer.pad_token = tokenizer.eos_token
         tokenized_data = tokenizer(final_sequences, max_length=150, truncation=True, padding=True, return_tensors="tf")
     else:
         tokenized_data = final_sequences
 
-    dataset = tf.data.Dataset.from_tensor_slices(tokenized_data)
+    input_ids = tokenized_data['input_ids']
+    attention_mask = tokenized_data['attention_mask']
+
+    dataset = tf.data.Dataset.from_tensor_slices({
+                                                    "input_ids": input_ids,
+                                                    "attention_mask": attention_mask
+                                                  })
 
     # at prediction time
     if not train:
