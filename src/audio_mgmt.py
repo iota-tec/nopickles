@@ -1,138 +1,78 @@
 from typing import Any, Union, Tuple
-import numpy as np
-import pyttsx3
-from pydub import AudioSegment
-import json
-import io
 import speech_recognition as sr
-from gtts import gTTS
-from io import BytesIO
+from google.cloud import texttospeech
 import pygame
-
+from io import BytesIO
 mp3_fp = BytesIO()
 recognizer = sr.Recognizer()
 pygame.mixer.init()
-
-
-# This is for training
-def convert_file_to_16k(filename: str) -> Union[AudioSegment, str]:
-    """
-    Convert a given audio file to 16K frames and 1 channel.
-
-    Args:
-        filename (str): The name of the audio file, must end with '.wav'
-
-    Returns:
-        AudioSegment: Audio data with 16K frame rate and 1 channel.
-    """
-    # Check if the input file is a WAV file
-    if filename.endswith('.wav'):
-        # Load the audio file
-        audio = AudioSegment.from_wav(filename)
-
-        # Set the frame rate to 16K and channels to 1
-        return audio.set_frame_rate(16000).set_channels(1)
-    elif filename.endswith('.m4a'):
-        audio = AudioSegment.from_file(filename, format="m4a")
-        return audio.set_frame_rate(16000).set_channels(1)
-
-    else:
-        return "Unsupported file format. Only '.wav' files are supported."
-
-
-# This is for training
-def store_into_database(file: str, transcript: str, cursor: Any) -> None:
-    """
-    Store an audio file and its transcript into audio_files table of MySQL database.
-
-    Args:
-        file (str): Path to the audio file
-        transcript (str): The transcript of the audio
-        cursor (MySQLCursor): Cursor object for database operations
-
-    Note:
-        This function assumes that you've already connected to the database.
-        Committing the transaction is done outside this function.
-    """
-
-    query = 'INSERT INTO audio_files(audio_data, transcript, meta_data) VALUES (%s, %s, %s)'
-
-    audio = convert_file_to_16k(file)
-
-    # Export audio data into bytes using AudioSegment's ``export`` method
-    buffer = io.BytesIO()
-    audio.export(buffer, format='wav')
-    audio_bytes = buffer.getvalue()
-
-    meta_data = json.dumps({
-        'filename': file,
-        'length': len(audio),
-        'frame_rate': audio.frame_rate,
-        'channels': audio.channels
-    })
-
-    val = (audio_bytes, transcript, meta_data)
-    cursor.execute(query, val)
-
-
-# This is for training
-def read_audio_from_database(file_id: int, cursor: Any) -> Tuple[np.ndarray, str, int]:
-    """
-    Reads an audio file, its transcript, and meta data from the database by file ID.
-
-    Args:
-        file_id (int): The ID of the audio file to be read from the database.
-        cursor (Any): The MySQL cursor object.
-
-    Returns:
-        Tuple[np.ndarray, str, int]: A tuple containing the audio data as a NumPy array,
-                                     the transcript as a string, and the frame rate as an integer.
-
-    Raises:
-        FileNotFoundError: If the row with the specified file ID does not exist.
-    """
-
-    query = f'SELECT audio_data, transcript, meta_data FROM audio_files WHERE id=%s'
-    cursor.execute(query, (file_id,))
-    row = cursor.fetchone()
-
-    if row is None:
-        raise FileNotFoundError(f"File with ID {file_id} not found in the database.")
-
-    audio_bytes, transcript, meta_data_str = row
-    meta_data = json.loads(meta_data_str)
-
-    audio_array = np.frombuffer(audio_bytes, np.int16)
-
-    return audio_array, transcript, meta_data['frame_rate']
 
 
 def speech_to_text() -> str:
     with sr.Microphone() as source:
         print('Listening..')
         while True:
-            audio = recognizer.listen(source)
+            audio = recognizer.listen(source, timeout=5, phrase_time_limit=6)
             try:
                 text = recognizer.recognize_google(audio)
                 print(text)
                 return text
 
             except sr.UnknownValueError:
-                print("Could not understand the audio")
+                return ''
             except sr.RequestError as e:
-                print("Could not request results; {0}".format(e))
+                speak('Something went wrong, please find a human employee to address the issue.')
+                return ''
 
 
-def speak(text: str, tld='com.au', lang='en') -> None:
-    tts = gTTS(text, tld, lang)
-    mp3_fp.seek(0)
-    mp3_fp.truncate()
-    tts.write_to_fp(mp3_fp)
+# def speak(text: str, tld='com.au', lang='en') -> None:
+#     tts = gTTS(text, tld, lang)
+#     mp3_fp.seek(0)
+#     mp3_fp.truncate()
+#     tts.write_to_fp(mp3_fp)
+#
+#     mp3_fp.seek(0)
+#     pygame.mixer.music.load(BytesIO(mp3_fp.read()))
+#     pygame.mixer.music.play()
+#     while pygame.mixer.music.get_busy():
+#         pass
+#
+#     pygame.mixer.music.stop()
 
-    mp3_fp.seek(0)
-    pygame.mixer.music.load(BytesIO(mp3_fp.read()))
+def speak(text: str, language_code='en-AU', voice_name='en-AU-Wavenet-C', pitch=1.2, speaking_rate=1.0):
+    client = texttospeech.TextToSpeechClient()
+
+    # Set the text input to be synthesized
+    synthesis_input = texttospeech.SynthesisInput(text=text)
+
+    # Build the voice request, select the language code and the ssml voice gender
+    voice = texttospeech.VoiceSelectionParams(
+        language_code=language_code,
+        name=voice_name,
+        ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL
+    )
+
+    # Select the type of audio file you want returned
+    audio_config = texttospeech.AudioConfig(
+        audio_encoding=texttospeech.AudioEncoding.MP3,
+        pitch=pitch,
+        speaking_rate=speaking_rate
+    )
+
+    # Perform the text-to-speech request on the text input with the selected voice parameters and audio file type
+    response = client.synthesize_speech(
+        input=synthesis_input,
+        voice=voice,
+        audio_config=audio_config
+    )
+
+    # The response's audio_content is binary
+    audio_content = BytesIO(response.audio_content)
+
+    pygame.mixer.init()
+    pygame.mixer.music.load(audio_content)
     pygame.mixer.music.play()
     while pygame.mixer.music.get_busy():
-        pass
+        continue
 
     pygame.mixer.music.stop()

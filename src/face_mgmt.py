@@ -1,7 +1,8 @@
 import os.path
+import sys
 import typing
 from typing import Union, Optional, Any, List, Tuple
-
+import audio_mgmt
 import cv2
 import face_recognition
 import numpy as np
@@ -30,13 +31,22 @@ def convert_to_encoding(file: Union[str, None] = None) -> Union[Tuple[str, Any],
         return person_name, encodings[0]
 
     video_capture = cv2.VideoCapture(0)
-    while True:
-        ret, frame = video_capture.read()
+    try:
+        while True:
+            ret, frame = video_capture.read()
+            if not ret:
+                continue  # If frame is not captured correctly, skip to the next frame
 
-        face_locations = face_recognition.face_locations(frame)
-        encodings = face_recognition.face_encodings(frame, face_locations)
-        print(type(encodings))
-        return None, encodings[0]
+            face_locations = face_recognition.face_locations(frame)
+            if face_locations:  # Check if any face is detected
+                encodings = face_recognition.face_encodings(frame, face_locations)
+                return None, encodings[0]  # Return the first encoding
+
+            # Implement cv2.waitKey to check for a key press
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                sys.exit()  # Terminate the program if 'q' is pressed
+    finally:
+        video_capture.release()
 
 
 def store_into_database(file: Optional[str] = None, *, cursor: Any) -> None:
@@ -108,13 +118,15 @@ def match_face(current_face: Union[str, None] = None, *, cursor):
         if match:
             matched_key = list(encoding_dict.keys())[idx]
             face_id, person_name = matched_key
-            return face_id, person_name
+            return face_id, person_name, current_encoding
         else:
-            handle_new_customer()
+            return None, None, current_encoding
 
 
 def handle_new_customer():
     # Implementation Pending
+    audio_mgmt.speak('Well hello there, seems like this is your first time with chato, but definitely wont be last, so what can I get you today?')
+    store_into_database()
     return 9999, 'New Customer'
 
 
