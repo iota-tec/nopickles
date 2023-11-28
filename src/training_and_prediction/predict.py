@@ -4,9 +4,10 @@ from src.preprocess import ner_prep
 
 
 def predict_intent(text, model, tokenizer):
+    dic = {0: 'order', 1: 'complain about', 2: 'get info about'}
     preprocessed_text = text_prep.preprocess_for_intent(text, intents=None, tokenizer=tokenizer, train=False)
     probas = model.predict(preprocessed_text)
-    return np.argmax(probas)
+    return dic[np.argmax(probas)]
 
 
 def predict_entities(text: str, model, tokenizer, label_map: dict, max_seq_length: int):
@@ -27,10 +28,30 @@ def predict_entities(text: str, model, tokenizer, label_map: dict, max_seq_lengt
     tokens = tokenizer.tokenize(tokenizer.decode(prediction_input['input_ids'][0]))
     predicted_labels = [reverse_label_map[idx] for idx in label_indices[0][:len(tokens)]]
 
-    # Filter out padding tokens
-    token_label_pairs = [(token, label) for token, label in zip(tokens, predicted_labels) if token != '[PAD]']
+    tokens = tokenizer.tokenize(tokenizer.decode(prediction_input['input_ids'][0]))
+    predicted_labels = [reverse_label_map[idx] for idx in label_indices[0][:len(tokens)]]
 
-    return token_label_pairs
+    word_label_pairs = []
+    current_word = ''
+    current_label = None
+
+    for token, label in zip(tokens, predicted_labels):
+        if token != '[PAD]':
+            if token.startswith('##'):
+                current_word += token[2:]
+            else:
+                if current_word:
+                    # Only add non-'O' labels
+                    if current_label != 'O':
+                        word_label_pairs.append((current_word, current_label))
+                current_word = token
+                current_label = label
+
+    # Add the last word if it's not empty and its label is not 'O'
+    if current_word and current_label != 'O':
+        word_label_pairs.append((current_word, current_label))
+
+    return word_label_pairs
 
 
 def generate_text(prompt, tokenizer, model, max_length=50):
@@ -49,9 +70,8 @@ def generate_text(prompt, tokenizer, model, max_length=50):
     return tokenizer.decode(output[0], skip_special_tokens=True)
 
 
-def chat_with_assistant(user_prompt, client, model, fresh=False):
-    global messages
-    if fresh or 'messages' not in globals():
+def chat_with_assistant(user_prompt, messages, client, model, fresh=False):
+    if fresh:
         messages = []
 
     # Append user's message
