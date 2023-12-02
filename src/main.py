@@ -1,4 +1,5 @@
 import os
+import sys
 
 os.chdir('C:/Users/thory/PycharmProjects/chatopotamus')
 
@@ -19,22 +20,48 @@ customer_cursor = chato_customer_db.cursor()
 
 person_name = None
 known_openings = ['Hi {}, what can I get for you today?',
-                  'Hey again {}, what are you craving for today?',
+                  'Hey there {}, what are you craving for today?',
                   'Oh Hi {}, whatcha having today?',
-                  'Helloooww again, tell me what can I get you {}']
+                  'Helloooww again, tell me what can I get you {}',
+                  'Oh its {}, what can I get for you dear?',
+                  'Lovely timing!! We just started brewing everything fresh, what can I get you then?']
 
-while True:
-    face_id, person_name, face_encoding = face_mgmt.match_face(cursor=customer_cursor)
+ACCENT_DICT = {3: {0: 'en-IN-Wavenet-A', 1: 'en-IN-Wavenet-B'},
+               0: {0: 'en-AU-Wavenet-C', 1: 'en-AU-Wavenet-B'},
+               1: {0: 'en-AU-Wavenet-C', 1: 'en-AU-Wavenet-B'},
+               2: {0: 'en-AU-Wavenet-C', 1: 'en-AU-Wavenet-B'},
+               4: {0: 'en-AU-Wavenet-C', 1: 'en-AU-Wavenet-B'}}
+cap = cv2.VideoCapture(0)
 
-    if person_name:
-        opening = random.choice(known_openings).format(person_name)
-        intent, entities, (response, messages) = nlp.regular_customer(opening)
+try:
+    while True:
+        while True:
+            ret, frame = cap.read()
 
-    else:
-        opening = random.choice(known_openings).format('')
-        intent, entities, (response, messages), person_name = nlp.new_customer(opening=opening, face_encoding=face_encoding)
+            if not ret:
+                continue
 
-    print(messages)
+            face_id, person_name, face_encoding = face_mgmt.match_face(frame=frame, cursor=customer_cursor)
 
-chato_customer_db.close()
-# chato_audio_db.close()
+            if face_encoding is None:
+                continue
+
+            if person_name:
+                opening = random.choice(known_openings).format(person_name)
+                intent, entities, (response, messages) = nlp.regular_customer(opening)
+            else:
+                opening = random.choice(known_openings).format('')
+                intent, entities, (response, messages), person_name = nlp.new_customer(opening=opening,
+                                                                                       face_encoding=face_encoding)
+
+            print(messages)
+
+            # Add a wait key and break from the loop if 'q' is pressed
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+finally:
+    # Release the video capture object when done
+    cap.release()
+    chato_customer_db.close()
+    # chato_audio_db.close()

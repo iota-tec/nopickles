@@ -39,7 +39,7 @@ def speech_to_text() -> str:
 #
 #     pygame.mixer.music.stop()
 
-def speak(text: str, language_code='en-AU', voice_name='en-AU-Wavenet-C', pitch=1.2, speaking_rate=1.0):
+def speak(text: str, language_code='en-CA', voice_name='en-AU-Wavenet-C', pitch=1.7, speaking_rate=1.0):
     client = texttospeech.TextToSpeechClient()
 
     # Set the text input to be synthesized

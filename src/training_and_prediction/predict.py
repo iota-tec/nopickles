@@ -1,6 +1,5 @@
 import numpy as np
-from src.preprocess import text_prep
-from src.preprocess import ner_prep
+from src.preprocess import ner_prep, image_prep, text_prep
 
 
 def predict_intent(text, model, tokenizer):
@@ -89,3 +88,10 @@ def chat_with_assistant(user_prompt, messages, client, model, fresh=False):
     messages.append({"role": "assistant", "content": assistant_message})
 
     return assistant_message, messages
+
+
+def predict_age_gender_race(frame, model):
+    prepped_frame = image_prep.preprocess_for_prediction(frame)
+    preds = model.predict(prepped_frame)
+    age, gender, race = preds[0], preds[1], np.argmax(preds[2])
+    return age, gender, race

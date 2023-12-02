@@ -3,9 +3,9 @@ import random
 import threading
 from openai import OpenAI
 from src.training_and_prediction import predict, models
-import audio_mgmt
+from src import audio_mgmt
 
-print('NOW LOADING NER...')
+print('LOADING NER...')
 with open('resources/bert/saved/ner_tokenizer.pkl', 'rb') as tn:
     bert_ner_tokenizer = pickle.load(tn)
 with open('resources/bert/data/label_map.pkl', 'rb') as lm:
@@ -20,14 +20,12 @@ with open('resources/bert/saved/intent_tokenizer.pkl', 'rb') as ti:
     bert_intent_tokenizer = pickle.load(ti)
 bert_intent_model = models.trained_intent_classifier()
 bert_intent_model.load_weights('resources/bert/saved/ir_trained_weights.h5')
-print('LOADED INTENT')
 
-print('\b' * 18)
-print('NOW LAODING GPT...')
+print('LOADING GPT...')
 with open('resources/API_KEY.txt', 'r') as f:
     OPENAI_API_KEY = f.readline()
-OPENAI_JOB = "ftjob-NOjJ5NxYigdba5FCHz8GXwQo"
-GPT3_MODEL = "ft:gpt-3.5-turbo-0613:personal::8PhccnUL"
+OPENAI_JOB = "ftjob-Zp11kb3ucXYxFopbsLaHWasg"
+GPT3_MODEL = "ft:gpt-3.5-turbo-0613:personal::8PpZSxCF"
 client = OpenAI(api_key=OPENAI_API_KEY)
 # completion = client.fine_tuning.jobs.retrieve(OPENAI_JOB)
 

@@ -2,13 +2,13 @@ import os.path
 import sys
 import typing
 from typing import Union, Optional, Any, List, Tuple
-import audio_mgmt
 import cv2
 import face_recognition
 import numpy as np
+# from src.gui.main_app import CameraManager
 
 
-def convert_to_encoding(file: Union[str, None] = None) -> Union[Tuple[str, Any], Tuple[None, Any]]:
+def convert_to_encoding(*, file: Union[str, None] = None, frame=None, return_locations_only: bool = False):
     """
     Convert a given image file or video feed into face encoding.
 
@@ -25,31 +25,26 @@ def convert_to_encoding(file: Union[str, None] = None) -> Union[Tuple[str, Any],
 
         image = cv2.imread(file)
         face_locations = face_recognition.face_locations(image)
+        if return_locations_only:
+            return image, face_locations
         encodings = face_recognition.face_encodings(image, face_locations)
 
         # Returning only the first encoding, multiple encoding support pending.
         return person_name, encodings[0]
-
-    video_capture = cv2.VideoCapture(0)
-    try:
-        while True:
-            ret, frame = video_capture.read()
-            if not ret:
-                continue  # If frame is not captured correctly, skip to the next frame
-
-            face_locations = face_recognition.face_locations(frame)
-            if face_locations:  # Check if any face is detected
-                encodings = face_recognition.face_encodings(frame, face_locations)
-                return None, encodings[0]  # Return the first encoding
-
-            # Implement cv2.waitKey to check for a key press
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                sys.exit()  # Terminate the program if 'q' is pressed
-    finally:
-        video_capture.release()
+    elif frame is not None:
+        face_locations = face_recognition.face_locations(frame)
+        if face_locations:  # Check if any face is detected
+            if return_locations_only:
+                return frame, face_locations
+            encodings = face_recognition.face_encodings(frame, face_locations)
+            return None, encodings[0]  # Return the first encoding
+        else:
+            if return_locations_only:
+                return frame, face_locations
+            return None, None
 
 
-def store_into_database(file: Optional[str] = None, *, cursor: Any) -> None:
+def store_into_database(*, file: Optional[str] = None, frame=None, cursor: Any) -> None:
     """
     Store a person's face encoding into the database.
 
@@ -62,7 +57,7 @@ def store_into_database(file: Optional[str] = None, *, cursor: Any) -> None:
         - None: The function performs database insertion and returns nothing.
     """
 
-    person_name, encoding = convert_to_encoding(file)
+    person_name, encoding = convert_to_encoding(file=file, frame=frame)
     query = 'INSERT INTO faces(person_name, face_encoding) VALUES (%s, %s)'
 
     encoding_bytes = encoding.tobytes()
@@ -109,9 +104,11 @@ def read_encoding_from_database(face_id: Union[int, List[int], str], cursor: Any
     return encoding_dict
 
 
-def match_face(current_face: Union[str, None] = None, *, cursor):
+def match_face(*, file=None, frame=None, cursor):
     encoding_dict = read_encoding_from_database('all', cursor)
-    current_person_name, current_encoding = convert_to_encoding(current_face)
+    current_person_name, current_encoding = convert_to_encoding(file=file, frame=frame)
+    if current_encoding is None:
+        return None, None, None
     all_encodings = list(encoding_dict.values())
     matches = face_recognition.compare_faces(all_encodings, current_encoding, tolerance=0.6)  # list of Booleans
     for idx, match in enumerate(matches):
@@ -123,11 +120,28 @@ def match_face(current_face: Union[str, None] = None, *, cursor):
             return None, None, current_encoding
 
 
-def handle_new_customer():
-    # Implementation Pending
-    audio_mgmt.speak('Well hello there, seems like this is your first time with chato, but definitely wont be last, so what can I get you today?')
-    store_into_database()
-    return 9999, 'New Customer'
+def draw_bounding_boxes(*, file=None, frame=None):
+    # Assuming you have a face detection method implemented
+    frame, face_locations = convert_to_encoding(file=file, frame=frame, return_locations_only=True)
+
+    for (top, right, bottom, left) in face_locations:
+        cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
+
+    return frame
+
+
+def crop_face_from_frame(frame):
+    # Find all face locations in the frame
+    face_locations = face_recognition.face_locations(frame)
+
+    # Assuming the first face is the one we want to crop
+    if face_locations:
+        top, right, bottom, left = face_locations[0]
+        face_image = frame[top:bottom, left:right]
+
+        return face_image
+    else:
+        return None  # No faces found in the frame
 
 
 # PENDING IMMEDIATELY
