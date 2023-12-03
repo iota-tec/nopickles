@@ -44,49 +44,60 @@ cap = cv2.VideoCapture(0)
 
 CNN_MODEL = keras.models.load_model('resources/age_gender/saved/age_gender_best_yet.h5')
 
-
 try:
-    while True:  # for customers
+    while True:  # Main loop for watching faces
         new_face = True
+        person_name = None
+
+        ret, frame = cap.read()
+        if not ret:
+            continue
+
+        face_id, person_name, face_encoding = face_mgmt.match_face(frame=frame, cursor=customer_cursor)
+        if face_encoding is None:
+            continue
+
+        # Predict age, gender, and ethnicity for each new face
+        if new_face:
+            age, gender, race = predict.predict_age_gender_race(frame, CNN_MODEL)
+            accent = ACCENT_DICT[race][gender]
+            print(f'Age: {abs(int(age))}, Gender: {gender_dict[gender]}, Ethnicity:{race_dict[race]}')
+            new_face = False
+
         messages = []
-        # face_encoding, face_id, person_name = None, None, None
+        intents = []
+        entity_tags = []
+        total_price = 0
+        continue_interaction = True
 
-        while True:  # for camera
-            ret, frame = cap.read()
+        opening = random.choice(known_openings).format(person_name if person_name else '')
+        audio_mgmt.speak(opening, accent=accent)
 
-            if not ret:
-                continue
+        # Interaction loop
+        while continue_interaction:
 
-            face_id, person_name, face_encoding = face_mgmt.match_face(frame=frame, cursor=customer_cursor)
+            customer_request = audio_mgmt.speech_to_text()
 
-            # Continue watching until a face is detected
-            if face_encoding is None:
-                continue
+            if not customer_request:
+                # Handling case where no input is received
+                continue_interaction = False
+                break
 
-            # Predict age, gender and ethnicity for each new face
-            if new_face:
-                age, gender, race = predict.predict_age_gender_race(frame, CNN_MODEL)
-                accent = ACCENT_DICT[race][gender]
-                print(f'Age: {abs(int(age))}, Gender: {gender_dict[gender]}, Ethnicity:{race_dict[race]}')
-                new_face = False
-
-            # Start talking
             if person_name:
-                print(f'Welcome {person_name}')
-                opening = random.choice(known_openings).format(person_name)
-                intent, entities, (response, messages) = nlp.regular_customer(opening, accent=accent)
+                intents, entity_tags, messages, total_price, continue_interaction = \
+                    nlp.regular_customer(customer_request, accent, messages, intents, entity_tags, total_price)
             else:
-                opening = random.choice(known_openings).format('')
-                intent, entities, (response, messages), person_name = nlp.new_customer(opening=opening,
-                                                                                       face_encoding=face_encoding,
-                                                                                       accent=accent,
-                                                                                       cursor=customer_cursor)
-            break
+                intents, entity_tags, messages, total_price, continue_interaction, person_name = \
+                    nlp.new_customer(customer_request, face_encoding, accent, customer_cursor, messages, intents, entity_tags, total_price)
+
+            # Check if interaction should continue
+            if not continue_interaction:
+                audio_mgmt.speak('Visit again, Bye!', accent=accent)
+                break  # End of one customer interaction
+
         print(messages)
 
-
 finally:
-    # Release the video capture object when done
+    # Release the video capture object and close database connection when done
     cap.release()
     chato_customer_db.close()
-    # chato_audio_db.close()

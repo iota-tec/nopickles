@@ -49,51 +49,53 @@ def get_all_info(request):
     return intent, entities, (response, message)
 
 
-def regular_customer(opening, accent):
-    messages = []
-    intents = []
-    entity_tags = []
-    response = None
-    total_price = 0
+def regular_customer(request, accent, messages, intents, entity_tags, total_price):
+    if not request or len(request) < 2:
+        return intents, entity_tags, messages, total_price, False  # Indicates interaction is over
 
-    audio_mgmt.speak(opening, accent=accent)
-    while True:
-        request = audio_mgmt.speech_to_text()
+    response, new_messages = predict.chat_with_assistant(request, messages=messages, client=client, model=GPT3_MODEL)
+    intent = predict.predict_intent(request, model=bert_intent_model, tokenizer=bert_intent_tokenizer)
+    entities = predict.predict_entities(request, model=bert_ner_model, tokenizer=bert_ner_tokenizer,
+                                        label_map=label_map, max_seq_length=26)
 
-        if not request or len(request) < 4:
-            audio_mgmt.speak('Visit again, Bye!', accent=accent)
-            break
-        response, messages = predict.chat_with_assistant(request, messages=messages, client=client, model=GPT3_MODEL)
-        intent = predict.predict_intent(request, model=bert_intent_model, tokenizer=bert_intent_tokenizer)
-        entities = predict.predict_entities(request, model=bert_ner_model, tokenizer=bert_ner_tokenizer,
-                                            label_map=label_map,
-                                            max_seq_length=26)
+    order_price = get_price(entities, 0)
+    total_price += order_price
+    response = response.replace("<price>", str(total_price))
 
-        order_price = get_price(entities, 0)
-        total_price += order_price
-        response = response.replace("<price>", str(total_price))
+    audio_mgmt.speak(response, accent=accent)
+    intents.append(intent)
+    print(f'\nCustomer wants to {intent} : '.upper())
 
-        audio_mgmt.speak(response, accent=accent)
-        intents.append(intent)
-        print(f'\nCustomer wants to {intent} : '.upper())
+    entity_tags.append(entities)
+    print_formatted_entities(entities)
 
-        entity_tags.append(entities)
-        print_formatted_entities(entities)
+    if 'order' in map(str.lower, intents):
+        print('Total: $' + str(total_price))
 
-        if 'order' in map(str.lower, intents):
-            print('Total: $' + str(total_price))
-
-    return intents, entity_tags, (response, messages)
+    return intents, entity_tags, new_messages, total_price, True  # Continue interaction
 
 
-def new_customer(opening, face_encoding, accent, cursor):
-    intents, entity_tags, (response, messages) = regular_customer(opening, accent=accent)
-    r = random.choice(['um..', 'ugh..'])
-    audio_mgmt.speak(str(r) + 'One last thing before we see you again, would you like to tell me your name if you want '
-                              'me to remember you when you visit next time?', accent=accent)
-    response_2 = audio_mgmt.speech_to_text().lower()
-    audio_mgmt.speak('alright, visit again, bye')
-    return intents, entity_tags, (response, messages), ''
+def new_customer(request, face_encoding, accent, cursor, messages, intents, entity_tags, total_price):
+    # Handle regular interaction
+    intents, entity_tags, new_messages, total_price, continue_interaction = regular_customer(request, accent, messages,
+                                                                                             intents, entity_tags,
+                                                                                             total_price)
+
+    # Only proceed to ask for name if interaction is concluded
+    if not continue_interaction:
+        # Asking for the customer's name
+        r = random.choice(['um..', 'ugh..'])
+        audio_mgmt.speak(
+            str(r) + 'One last thing before we see you again, would you like to tell me your name if you want me to remember you when you visit next time?',
+            accent=accent)
+        response_2 = audio_mgmt.speech_to_text().lower()
+
+        person_name = ''  # Logic to extract person name from response_2
+
+        return intents, entity_tags, new_messages + messages, total_price, False, person_name
+
+    # If interaction is not concluded, continue without asking for name
+    return intents, entity_tags, new_messages, total_price, True, ''
 
 
 def get_price(entities, current_price):
@@ -146,5 +148,3 @@ def print_formatted_entities(entities):
         print("Beverage: " + beverage_line.title())
     if food_line:
         print("Food: " + food_line.title())
-
-
