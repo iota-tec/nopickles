@@ -12,12 +12,15 @@ def speech_to_text() -> str:
     with sr.Microphone() as source:
         print('Listening..')
         while True:
-            audio = recognizer.listen(source, timeout=5, phrase_time_limit=6)
+            # audio = recognizer.listen(source, timeout=5, phrase_time_limit=6)
             try:
+                audio = recognizer.listen(source, timeout=5, phrase_time_limit=6)
                 text = recognizer.recognize_google(audio)
                 print(text)
                 return text
 
+            except sr.WaitTimeoutError:
+                return ''
             except sr.UnknownValueError:
                 return ''
             except sr.RequestError as e:
@@ -39,7 +42,7 @@ def speech_to_text() -> str:
 #
 #     pygame.mixer.music.stop()
 
-def speak(text: str, language_code='en-AU', voice_name='en-AU-Wavenet-C', pitch=1.2, speaking_rate=1.0):
+def speak(text: str, language_code='en-CA', accent='en-AU-Wavenet-C', pitch=1.7, speaking_rate=1.0):
     client = texttospeech.TextToSpeechClient()
 
     # Set the text input to be synthesized
@@ -48,7 +51,7 @@ def speak(text: str, language_code='en-AU', voice_name='en-AU-Wavenet-C', pitch=
     # Build the voice request, select the language code and the ssml voice gender
     voice = texttospeech.VoiceSelectionParams(
         language_code=language_code,
-        name=voice_name,
+        name=accent,
         ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL
     )
 

@@ -3,9 +3,9 @@ import random
 import threading
 from openai import OpenAI
 from src.training_and_prediction import predict, models
-import audio_mgmt
+from src import audio_mgmt
 
-print('NOW LOADING NER...')
+print('LOADING NER...')
 with open('resources/bert/saved/ner_tokenizer.pkl', 'rb') as tn:
     bert_ner_tokenizer = pickle.load(tn)
 with open('resources/bert/data/label_map.pkl', 'rb') as lm:
@@ -20,14 +20,12 @@ with open('resources/bert/saved/intent_tokenizer.pkl', 'rb') as ti:
     bert_intent_tokenizer = pickle.load(ti)
 bert_intent_model = models.trained_intent_classifier()
 bert_intent_model.load_weights('resources/bert/saved/ir_trained_weights.h5')
-print('LOADED INTENT')
 
-print('\b' * 18)
-print('NOW LAODING GPT...')
+print('LOADING GPT...')
 with open('resources/API_KEY.txt', 'r') as f:
     OPENAI_API_KEY = f.readline()
-OPENAI_JOB = "ftjob-NOjJ5NxYigdba5FCHz8GXwQo"
-GPT3_MODEL = "ft:gpt-3.5-turbo-0613:personal::8PhccnUL"
+OPENAI_JOB = "ftjob-Zp11kb3ucXYxFopbsLaHWasg"
+GPT3_MODEL = "ft:gpt-3.5-turbo-0613:personal::8PpZSxCF"
 client = OpenAI(api_key=OPENAI_API_KEY)
 # completion = client.fine_tuning.jobs.retrieve(OPENAI_JOB)
 
@@ -51,19 +49,19 @@ def get_all_info(request):
     return intent, entities, (response, message)
 
 
-def regular_customer(opening):
+def regular_customer(opening, accent):
     messages = []
     intents = []
     entity_tags = []
     response = None
     total_price = 0
 
-    audio_mgmt.speak(opening)
+    audio_mgmt.speak(opening, accent=accent)
     while True:
         request = audio_mgmt.speech_to_text()
 
         if not request or len(request) < 4:
-            audio_mgmt.speak('Visit again, Bye!')
+            audio_mgmt.speak('Visit again, Bye!', accent=accent)
             break
         response, messages = predict.chat_with_assistant(request, messages=messages, client=client, model=GPT3_MODEL)
         intent = predict.predict_intent(request, model=bert_intent_model, tokenizer=bert_intent_tokenizer)
@@ -75,9 +73,9 @@ def regular_customer(opening):
         total_price += order_price
         response = response.replace("<price>", str(total_price))
 
-        audio_mgmt.speak(response)
+        audio_mgmt.speak(response, accent=accent)
         intents.append(intent)
-        print(f'{intent} : '.upper())
+        print(f'\nCustomer wants to {intent} : '.upper())
 
         entity_tags.append(entities)
         print_formatted_entities(entities)
@@ -88,11 +86,11 @@ def regular_customer(opening):
     return intents, entity_tags, (response, messages)
 
 
-def new_customer(opening, face_encoding):
-    intents, entity_tags, (response, messages) = regular_customer(opening)
-    r = random.choice(['amm..', ''])
+def new_customer(opening, face_encoding, accent, cursor):
+    intents, entity_tags, (response, messages) = regular_customer(opening, accent=accent)
+    r = random.choice(['um..', 'ugh..'])
     audio_mgmt.speak(str(r) + 'One last thing before we see you again, would you like to tell me your name if you want '
-                              'me to remember you when you visit next time?')
+                              'me to remember you when you visit next time?', accent=accent)
     response_2 = audio_mgmt.speech_to_text().lower()
     audio_mgmt.speak('alright, visit again, bye')
     return intents, entity_tags, (response, messages), ''
