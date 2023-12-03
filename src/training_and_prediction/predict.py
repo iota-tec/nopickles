@@ -92,6 +92,6 @@ def chat_with_assistant(user_prompt, messages, client, model, fresh=False):
 
 def predict_age_gender_race(frame, model):
     prepped_frame = image_prep.preprocess_for_prediction(frame)
-    preds = model.predict(prepped_frame)
-    age, gender, race = preds[0], preds[1], np.argmax(preds[2])
+    age, gender, race = model.predict(prepped_frame)
+    age, gender, race = np.round(age[0][0],2), int(np.round(gender[0][0])), np.argmax(race[0], axis=-1)
     return age, gender, race

@@ -7,7 +7,6 @@ import face_recognition
 import numpy as np
 # from src.gui.main_app import CameraManager
 
-
 def convert_to_encoding(*, file: Union[str, None] = None, frame=None, return_locations_only: bool = False):
     """
     Convert a given image file or video feed into face encoding.

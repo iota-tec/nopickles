@@ -121,6 +121,10 @@ def create_cnn_model(compile=False, lr=0.001):
     return model
 
 
+def trained_cnn():
+    model = keras.models.load_model('resources/age_gender/saved/age_gender_best_yet.h5')
+    return model
+
 def create_cnn_vgg(compile=False):
     # Define input tensor
     input_tensor = keras.Input(shape=(200, 200, 3))

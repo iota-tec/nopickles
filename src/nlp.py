@@ -49,19 +49,19 @@ def get_all_info(request):
     return intent, entities, (response, message)
 
 
-def regular_customer(opening):
+def regular_customer(opening, accent):
     messages = []
     intents = []
     entity_tags = []
     response = None
     total_price = 0
 
-    audio_mgmt.speak(opening)
+    audio_mgmt.speak(opening, accent=accent)
     while True:
         request = audio_mgmt.speech_to_text()
 
         if not request or len(request) < 4:
-            audio_mgmt.speak('Visit again, Bye!')
+            audio_mgmt.speak('Visit again, Bye!', accent=accent)
             break
         response, messages = predict.chat_with_assistant(request, messages=messages, client=client, model=GPT3_MODEL)
         intent = predict.predict_intent(request, model=bert_intent_model, tokenizer=bert_intent_tokenizer)
@@ -73,9 +73,9 @@ def regular_customer(opening):
         total_price += order_price
         response = response.replace("<price>", str(total_price))
 
-        audio_mgmt.speak(response)
+        audio_mgmt.speak(response, accent=accent)
         intents.append(intent)
-        print(f'{intent} : '.upper())
+        print(f'\nCustomer wants to {intent} : '.upper())
 
         entity_tags.append(entities)
         print_formatted_entities(entities)
@@ -86,11 +86,11 @@ def regular_customer(opening):
     return intents, entity_tags, (response, messages)
 
 
-def new_customer(opening, face_encoding):
-    intents, entity_tags, (response, messages) = regular_customer(opening)
-    r = random.choice(['amm..', ''])
+def new_customer(opening, face_encoding, accent, cursor):
+    intents, entity_tags, (response, messages) = regular_customer(opening, accent=accent)
+    r = random.choice(['um..', 'ugh..'])
     audio_mgmt.speak(str(r) + 'One last thing before we see you again, would you like to tell me your name if you want '
-                              'me to remember you when you visit next time?')
+                              'me to remember you when you visit next time?', accent=accent)
     response_2 = audio_mgmt.speech_to_text().lower()
     audio_mgmt.speak('alright, visit again, bye')
     return intents, entity_tags, (response, messages), ''
