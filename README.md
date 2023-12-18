@@ -19,7 +19,7 @@ Chatopotamus is an innovative solution designed to streamline order management a
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/chatopotamus.git
+   git clone https://github.com/ryuukkk/chatopotamus.git
    cd chatopotamus
    ```
 2. Install the required dependencies:
