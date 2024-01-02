@@ -58,8 +58,8 @@ def regular_customer(request, accent, messages, intents, entity_tags, total_pric
     entities = predict.predict_entities(request, model=bert_ner_model, tokenizer=bert_ner_tokenizer,
                                         label_map=label_map, max_seq_length=26)
 
-    order_price = get_price(entities, 0)
-    total_price += order_price
+    total_price = get_price(entities, total_price)
+    # total_price += order_price
     response = response.replace("<price>", str(total_price))
 
     audio_mgmt.speak(response, accent=accent)
@@ -84,7 +84,7 @@ def new_customer(request, face_encoding, accent, cursor, messages, intents, enti
     # Only proceed to ask for name if interaction is concluded
     if not continue_interaction:
         # Asking for the customer's name
-        r = random.choice(['um..', 'ugh..'])
+        r = random.choice(['um..', 'ugh..', 'er..'])
         audio_mgmt.speak(
             str(r) + 'One last thing before we see you again, would you like to tell me your name if you want me to remember you when you visit next time?',
             accent=accent)
@@ -99,7 +99,7 @@ def new_customer(request, face_encoding, accent, cursor, messages, intents, enti
 
 
 def get_price(entities, current_price):
-    global menu  # Assuming the menu dictionary is globally available
+    global menu
 
     total_price = current_price
     last_beverage_price = 0
