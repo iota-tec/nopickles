@@ -1,11 +1,16 @@
 from typing import Any, Union, Tuple
+import sounddevice
 import speech_recognition as sr
 from google.cloud import texttospeech
 import pygame
 from io import BytesIO
+
 mp3_fp = BytesIO()
 recognizer = sr.Recognizer()
 pygame.mixer.init()
+
+from google.oauth2 import service_account
+from google.cloud import texttospeech
 
 
 def speech_to_text() -> str:
@@ -43,7 +48,8 @@ def speech_to_text() -> str:
 #     pygame.mixer.music.stop()
 
 def speak(text: str, language_code='en-CA', accent='en-AU-Wavenet-C', pitch=1.7, speaking_rate=1.0):
-    client = texttospeech.TextToSpeechClient()
+    credentials = service_account.Credentials.from_service_account_file('/home/crow/Iota/chatopotamus/chatopotamus-4df799251cd4.json')
+    client = texttospeech.TextToSpeechClient(credentials=credentials)
 
     # Set the text input to be synthesized
     synthesis_input = texttospeech.SynthesisInput(text=text)

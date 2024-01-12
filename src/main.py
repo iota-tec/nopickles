@@ -3,7 +3,7 @@ import sys
 
 import keras.models
 
-os.chdir('C:/Users/thory/PycharmProjects/chatopotamus')
+os.chdir('/home/crow/Iota/chatopotamus')
 
 import random
 import cv2
@@ -13,7 +13,7 @@ from training_and_prediction import models, predict
 
 chato_customer_db = mysql.connector.connect(
     host='localhost',
-    user='root',
+    user='crow',
     password='0301sonaL',
     database='chato_customer',
     auth_plugin='mysql_native_password'
