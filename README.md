@@ -8,11 +8,13 @@ Chatopotamus is an innovative solution designed to streamline order management a
 - **Real-time Inventory Management**: Keeps track of inventory in real-time, updating availability based on orders.
 - **Manager Interaction**: Allows managers to interact with the system to update inventory or communicate with customers.
 - **Local and Cloud Data Storage**: Stores data locally and on the cloud ensuring robust data management and analytics.
+- **Customer Tailored Accent and Dialect**: Talks back to your customers in their native accents.
 
 ## Getting Started
 
 ### Prerequisites
-- Python 3.9
+- Ubuntu 22.04
+- Python 3.11
 - MySQL 8.x 
 - TensorFlow, Keras, DeepSpeech, Pyttsx, and other necessary libraries (see ``requirements.txt``).
 
