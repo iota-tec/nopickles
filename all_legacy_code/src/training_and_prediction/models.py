@@ -1,7 +1,7 @@
 import tensorflow as tf
 from transformers import TFDistilBertModel, BertConfig, TFBertForTokenClassification
 from tensorflow import keras
-from src.preprocess import ner_prep
+from all_legacy_code.src.preprocess import ner_prep
 
 
 def create_intent_classifier(compile=False, init_lr=0.00001, dropout=0.3):

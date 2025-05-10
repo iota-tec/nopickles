@@ -1,9 +1,9 @@
 import pickle
 import random
-import threading
 from openai import OpenAI
-from src.training_and_prediction import predict, models
-from src import audio_mgmt
+from all_legacy_code.src.training_and_prediction import models
+from all_legacy_code.src.training_and_prediction import predict
+from all_legacy_code.src import audio_mgmt
 
 print('LOADING NER...')
 with open('resources/bert/saved/ner_tokenizer.pkl', 'rb') as tn:

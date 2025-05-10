@@ -1,5 +1,4 @@
 import os
-import sys
 
 import keras.models
 
@@ -8,8 +7,8 @@ os.chdir('/home/crow/Iota/chatopotamus')
 import random
 import cv2
 import mysql.connector
-import audio_mgmt, face_mgmt, nlp
-from training_and_prediction import models, predict
+import face_mgmt, nlp
+from training_and_prediction import predict
 
 chato_customer_db = mysql.connector.connect(
     host='localhost',

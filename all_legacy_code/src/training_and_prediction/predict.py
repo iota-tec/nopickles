@@ -1,5 +1,6 @@
 import numpy as np
-from src.preprocess import ner_prep, image_prep, text_prep
+from all_legacy_code.src.preprocess import text_prep
+from all_legacy_code.src.preprocess import image_prep, ner_prep
 
 
 def predict_intent(text, model, tokenizer):

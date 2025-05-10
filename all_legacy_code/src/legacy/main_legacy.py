@@ -1,6 +1,6 @@
 import deepspeech
 import mysql.connector
-from src import audio_mgmt, face_mgmt, nlp
+from all_legacy_code.src import face_mgmt
 import legacy
 
 ds = deepspeech.Model('../resources/deepspeech/saved/deepspeech-0.9.3-models.pbmm')
