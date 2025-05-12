@@ -1,49 +1,148 @@
-# Chatopotamus: Where Your Voice is the Special Ingredient
 
-Chatopotamus is an innovative solution designed to streamline order management and customer interaction in restaurant chains. Utilizing cutting-edge technologies like Automatic Speech Recognition (ASR), Natural Language Processing (NLP), and facial recognition, it offers a seamless, human-like interaction experience for customers while automating order-taking and inventory management.
+# NoPickles.ai
 
-## Features
-- **Voice-activated Ordering**: Processes customer orders through voice, using ASR and NLP technologies.
-- **Facial Recognition**: Recognizes returning customers and personalizes the interaction.
-- **Real-time Inventory Management**: Keeps track of inventory in real-time, updating availability based on orders.
-- **Manager Interaction**: Allows managers to interact with the system to update inventory or communicate with customers.
-- **Local and Cloud Data Storage**: Stores data locally and on the cloud ensuring robust data management and analytics.
-- **Customer Tailored Accent and Dialect**: Talks back to your customers in their native accents.
+_A modular, AI-first POS system for fast food chains – blending real-time personalization, order intelligence, and multimodal interaction._
+(Under-construction)
+---
 
-## Getting Started
+## Table of Contents
 
-### Prerequisites
-- Ubuntu 22.04
-- Python 3.11
-- MySQL 8.x 
-- TensorFlow, Keras, DeepSpeech, Pyttsx, and other necessary libraries (see ``requirements.txt``).
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Tech Stack](#tech-stack)
+- [Directory Structure](#directory-structure)
+- [Development Setup](#development-setup)
+- [Testing](#testing)
+- [License](#license)
 
-### Installation
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/ryuukkk/chatopotamus.git
-   cd chatopotamus
-   ```
-2. Install the required dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-   **OR**
-   create a conda environment using the following command before beginning:
-   ```bash
-   conda env create -f environment.yml
-   ```
+---
+## Overview
 
-3. Set up your MySQL databases as per the instructions in `db_setup.md`.
+NoPickles is a production-grade conversational kiosk platform for fast food environments. It is designed to simulate a human-like customer service experience using advanced agentic workflows, real-time personalization, and voice/face recognition — all while maintaining full compatibility with traditional PoS and analytics systems.
 
-### Usage
-1. Run the main script to start the application:
-   ```bash
-   python src/main.py
-   ```
-2. Follow the on-screen instructions to interact with Chatopotamus.
+The system includes:
+- Multimodal customer interaction (voice, face, touch)
+- Personalized upsell/cross-sell suggestions using retrieval-augmented generation
+- Fine-tunable avatar models for conversational embeddings
+- Manager-side dashboards for analytics, voice ops, and staff/inventory tracking
+- Plug-and-play edge deployment across multiple kiosks
 
-### Development
-Detailed documentation for development, including the setup of various modules (audio management, facial recognition, and NLP) can be found in the `docs` folder.
-/src directory has the complete library.
-main.ipynb is a demonstration of the implemented parts.
+---
+
+## Architecture
+
+```text
+[C# Windows IoT Frontend]
+        │
+        ▼
+[FastAPI Gateway] ──▶ [LangChain Agent (RAG + LLMs)]
+        │                          │
+        ▼                          ▼
+[Auth / Session Layer]      [PyTorch Avatar Models]
+        │                          │
+        ▼                          ▼
+     [MySQL DB]              [Vector DB (FAISS)]
+````
+
+Kiosks interact via a lightweight FastAPI backend, supported by PyTorch-based models for real-time inference. All services are containerized for IoT or server-based deployment. Realtime event propagation (planned) will use Redis/MQTT. Infrastructure is defined in Terraform and K8s manifests.
+
+---
+## Tech Stack
+
+**Frontend**
+
+- C# (.NET) on Windows IoT Core for kiosk hardware integration
+    
+- WPF/XAML for customer-side UI
+    
+
+**Backend**
+
+- FastAPI (Python 3.12+)
+    
+- PyTorch (transformer-based models, personalization)
+    
+- LangChain for orchestration and agent workflows
+    
+- Hugging Face Transformers (quantized + fine-tuned variants)
+    
+- FAISS (planned) for vector search in RAG
+    
+- MySQL for structured persistent data
+    
+- Docker + Kubernetes + Terraform for deployment
+    
+- GitHub Actions for CI
+    
+
+**Data Engineering**
+
+- Redis Pub/Sub or MQTT for cross-kiosk messaging
+    
+- dbt + Airflow (under `data-engineering/`) for analytics pipelines
+    
+- Sentry + Prometheus/Grafana for observability
+    
+
+---
+## Directory Structure
+
+```text
+.
+├── apps/                 # Customer, Manager, and PoS interface apps
+├── services/             # FastAPI gateway, agent orchestration, auth
+├── ml/                   # PyTorch models for personalization, avatars
+├── data/                 # Raw, mock, and processed datasets
+├── data-engineering/     # DE pipelines: ingest, transform, warehouse (TBD)
+├── infra/                # Docker, K8s, Terraform
+├── scripts/              # One-off utilities, data migration, etc.
+├── tests/                # Unit, integration, e2e tests
+├── docs/                 # Markdown docs and model cards
+├── all_legacy_code/      # Archived prototype codebase (non-critical)
+├── notebooks/            # Experimental and training workflows
+├── .github/              # Actions workflows, issue templates
+```
+
+---
+## Development Setup
+
+### Requirements
+
+- Python 3.12+
+    
+- CUDA 12.8+ (for GPU acceleration)
+    
+- Docker & Docker Compose
+    
+- .NET SDK (for frontend C# development)
+    
+### Install Backend
+
+```bash
+git clone https://github.com/nopickles/nopickles.git
+cd nopickles
+python -m venv venv && source venv/bin/activate
+pip install -r services/agent-core/requirements.txt
+```
+### Run All Services
+
+```bash
+docker-compose up --build
+```
+
+> Note: For local dev, start services manually via uvicorn / dotnet run. For production, use the `infra/` stack.
+
+---
+## Testing
+
+```bash
+pytest tests/unit
+pytest tests/integration
+```
+
+E2E tests are under development for the full kiosk-to-server flow.
+
+---
+## License
+
+This project is licensed under the MIT License.
